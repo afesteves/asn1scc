@@ -1,4 +1,4 @@
-﻿module Ast.SDL
+﻿module AstSDL
 
 //type PLACEHOLDER = int
 

@@ -1,11 +1,13 @@
-﻿module PopulateAST
+﻿module PopulateSDL
 
 open System.Linq
 open System.Numerics
-open Ast.SDL
+open Ast
+open AstSDL
 open Antlr.SDL
 open Antlr.Runtime.Tree
 open Antlr.Runtime
+open FsUtils
 
 let inline fromAntlr (antlr: ^a when ^a: (static member toAst: ^a -> ^a')) : ^a' =
     (^a: (static member toAst: ^a -> ^a') (antlr))
@@ -13,6 +15,11 @@ let inline fromAntlr (antlr: ^a when ^a: (static member toAst: ^a -> ^a')) : ^a'
 let inline fromAntlrs antlrs = Seq.map fromAntlr antlrs
 
 type Antlr = sdlParser
+type PRParse = {
+  tree: ITree
+  filename: string
+  tokens: IToken[]
+}
 
 type Antlr.pr_file_return with
   static member toAst(): PRFile =
@@ -22,6 +29,14 @@ type Antlr.pr_file_return with
         systems   = []
         processes = []
       }
+
+let buildFile (parse: PRParse) = 
+    Antlr.pr_file_return.toAst()
+
+let buildAst (files:(ITree*string*array<IToken>) seq) =
+    Seq.map (fun (t,s,ts) -> buildFile { tree = t; filename = s; tokens = ts }) files
+
+
 
 (*
 and Terminator =

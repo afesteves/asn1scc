@@ -90,6 +90,14 @@
       <Project>{000896AE-1E52-4120-8394-0E5E07A8F194}</Project>
       <Name>Backend2</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Antlr.SDL\Antlr.SDL.csproj">
+      <Project>{15A9A3B2-E3C9-4BD9-9D43-E156D1854BAD}</Project>
+      <Name>Antlr.SDL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Ast.SDL\Ast.SDL.fsproj">
+      <Project>{914DAE7D-2F7B-4F75-9A20-6BE6E6611742}</Project>
+      <Name>Ast.SDL</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resource1.resx">

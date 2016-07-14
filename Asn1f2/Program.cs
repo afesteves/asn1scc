@@ -19,6 +19,7 @@ using Antlr.Runtime.Tree;
 using System.IO;
 using Antlr.Asn1;
 using Antlr.Acn;
+using Antlr.SDL;
 
 
 namespace Asn1f2
@@ -102,16 +103,21 @@ namespace Asn1f2
             return renamePolicy;
         }
 
+        private static IEnumerable<String> getFiles (IEnumerable<String> args, params string[] extensions) {
+            return args.Where (a => !a.StartsWith ("-") && extensions.Any (e => a.ToLower().EndsWith("." + e)));
+        }
 
         public static int CheckSuccess(IEnumerable<string> args)
         {
-            var asn1InputFiles = args.Where(a => !a.StartsWith("-") && (a.ToLower().EndsWith(".asn1") || a.ToLower().EndsWith(".asn")));
-            var acnInputFiles = args.Where(a => !a.StartsWith("-") && a.ToLower().EndsWith(".acn"));
-            
-            foreach (var f in asn1InputFiles.Concat(acnInputFiles))
-                if (!File.Exists(f))
-                    throw new FsUtils.SemanticError(new FsUtils.SrcLoc(f, 0, 0), string.Format("File does not exist"));
+            var asn1InputFiles = getFiles(args, "asn", "asn1");
+            var acnInputFiles  = getFiles(args, "acn");
+            var sdlInputFiles  = getFiles(args, "pr");
 
+            var allFiles = asn1InputFiles.Concat(acnInputFiles).Concat(sdlInputFiles);
+            foreach (var f in allFiles)
+                if (!File.Exists (f))
+                    throw new FsUtils.SemanticError (new FsUtils.SrcLoc (f, 0, 0), string.Format ("File does not exist"));
+            
             var cmdArgs = CmdLineArgs.CmdLineArguments.GetInstance(Usage);
             CmdLineArgs.CmdLineArguments.Args = args.ToArray();
             cmdArgs.RegisterArg(new List<CmdLineArgs.CmdArg>() 
@@ -147,6 +153,13 @@ namespace Asn1f2
             cmdArgs.CheckArguments();
             if (cmdArgs.HasArgument("h"))
                 Environment.Exit(Usage());
+
+            if (sdlInputFiles.Any()) {
+                PopulateSDL.buildAst(ParseSDLInputFiles (sdlInputFiles));
+
+                return 0;
+            }
+
             if (!asn1InputFiles.Any())
             {
                 Console.Error.WriteLine("No input files");
@@ -433,7 +446,10 @@ namespace Asn1f2
         {
             return inputFiles.Select(f => Parse(f, fs => new acnLexer(fs), ts => new acnParser(ts), p => (CommonTree)p.moduleDefinitions().Tree)).ToList();
         }
-
+        public static List<Tuple<ITree, string, IToken []>> ParseSDLInputFiles (IEnumerable<string> inputFiles)
+        {
+            return inputFiles.Select (f => Parse (f, fs => new sdlLexer (fs), ts => new sdlParser (ts), p => (CommonTree)p.pr_file ().Tree)).ToList ();
+        }
 
         static void exportCustomStg(CmdLineArgs.CmdLineArguments cmdArgs, String customStg, String cmdLingName, Action<string, string> backendInvocation)
         {

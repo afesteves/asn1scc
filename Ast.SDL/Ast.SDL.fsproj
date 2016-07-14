@@ -59,6 +59,10 @@
       <Project>{15A9A3B2-E3C9-4BD9-9D43-E156D1854BAD}</Project>
       <Name>Antlr.SDL</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Ast\Ast.fsproj">
+      <Project>{3B67372A-65C7-439E-849F-CE1A1D2FCC69}</Project>
+      <Name>Ast</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(FSharpTargetsPath)" />
 </Project>
