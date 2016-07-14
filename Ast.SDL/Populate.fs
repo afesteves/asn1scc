@@ -31,10 +31,13 @@ type Antlr.pr_file_return with
       }
 
 let buildFile (parse: PRParse) = 
+    printfn "WHYY"
     Antlr.pr_file_return.toAst()
 
 let buildAst (files:(ITree*string*array<IToken>) seq) =
-    Seq.map (fun (t,s,ts) -> buildFile { tree = t; filename = s; tokens = ts }) files
+    printfn "STUPID XAMARIN"
+    printfn "%A" <| Seq.length files
+    Seq.map (fun (t,s,ts) -> buildFile { tree = t; filename = s; tokens = ts }) files |> Seq.toList
 
 
 
