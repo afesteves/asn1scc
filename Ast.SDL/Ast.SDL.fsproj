@@ -40,9 +40,25 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="Antlr3.Utility">
+      <HintPath>..\Antlr.SDL\antlr313\Antlr3.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="Antlr3.Runtime">
+      <HintPath>..\Antlr.SDL\antlr313\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="antlr.runtime">
+      <HintPath>..\Antlr.SDL\antlr313\antlr.runtime.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Ast.fs" />
+    <Compile Include="Populate.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Antlr.SDL\Antlr.SDL.csproj">
+      <Project>{15A9A3B2-E3C9-4BD9-9D43-E156D1854BAD}</Project>
+      <Name>Antlr.SDL</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(FSharpTargetsPath)" />
 </Project>

@@ -8,9 +8,12 @@ type ID = string
 type Filename = string
 type Sort = string
 type InformalText = String
-type PRFile = PREntity NonEmpty
 
-and PREntity = Choice<UseClause, System, Process>
+type PRFile = {
+    clauses: UseClause list
+    systems: System list
+    processes: Process list
+}
 
 and UseClause    = { asn1: Filename Option; package: ID; uses: ID list }
 and System       = { id: ID; entities: SystemEntity list }
