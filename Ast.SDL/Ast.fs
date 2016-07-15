@@ -2,7 +2,7 @@
 
 //type PLACEHOLDER = int
 
-type NonEmpty<'a>   = { first: 'a; rest: 'a list}
+open FSharpx.Collections
 
 type ID = string
 type Filename = string
@@ -17,14 +17,14 @@ type PRFile = {
 
 and UseClause    = { asn1: Filename Option; package: ID; uses: ID list }
 and System       = { id: ID; entities: SystemEntity list }
-and Channel      = { id: ID; routes: Block   Route NonEmpty }
-and SignalRoute  = { id: ID; routes: Process Route NonEmpty }
+and Channel      = { id: ID; routes: Block   Route NonEmptyList }
+and SignalRoute  = { id: ID; routes: Process Route NonEmptyList }
 and Block        = { id: ID; entities: BlockEntity list }
 
 and SystemEntity = Choice<Signal, Block, TextArea, Procedure, Channel>
 and BlockEntity  = Choice<Signal, Block, SignalRoute, Connection, Process>
 
-and Connection = { channels: ID NonEmpty; routes: ID NonEmpty }
+and Connection = { channels: ID NonEmptyList; routes: ID NonEmptyList }
 and Signal = { 
     id: ID
     parameterNames: ID list
@@ -32,7 +32,7 @@ and Signal = {
     cifEnd: CIFEnd
 }
 
-and Route<'a>    = { source: 'a; dest: 'a; signals: Signal NonEmpty }
+and Route<'a>    = { source: 'a; dest: 'a; signals: Signal NonEmptyList }
 
 and CIFCoordinates = { 
     x: int; width: int
@@ -61,7 +61,7 @@ and Procedure = {
 }
 and ProcedureBody = 
     | PB_Start of start: Start * parts: BodyPart list
-    | PB_Parts of parts: BodyPart NonEmpty
+    | PB_Parts of parts: BodyPart NonEmptyList
 
 and TextArea = {
     cif: CIFCoordinates
@@ -130,7 +130,7 @@ and State = {
 }
 
 and StateBody =
-    | SB_States of ID NonEmpty
+    | SB_States of ID NonEmptyList
     | SB_Exception of ID list
 
 and StatePart = 
@@ -143,7 +143,7 @@ and StatePart =
 
 and SaveBody = 
     | SB_All
-    | SB_List of ID NonEmpty
+    | SB_List of ID NonEmptyList
 
 and SpontaneousTransition = {
     cif: CIFCoordinates option
@@ -222,7 +222,7 @@ and Direction = IN | OUT
 
 and ConnectionPoint = {
     direction: Direction
-    states: ID NonEmpty
+    states: ID NonEmptyList
     cifEnd: CIFEnd
 }
 
@@ -230,7 +230,7 @@ and ConnectionPoint = {
 and InputPart = {
     cif: CIFCoordinates
     hyperlink: Hyperlink
-    stimuli: Stimulus NonEmpty
+    stimuli: Stimulus NonEmptyList
     cifEnd: CIFEnd
     guard: Expr
     transition: Transition option
@@ -243,7 +243,7 @@ and Stimulus = {
 
 and Transition = {
     label: Label option
-    actions: Action NonEmpty
+    actions: Action NonEmptyList
     statement: TerminatorStatement
 }
 
@@ -261,11 +261,11 @@ and ActionBody =
     | A_ProcedureCall of ProcedureCall
   
 and TimerOperation =
-    | Set of TimerSetPart NonEmpty
-    | Reset of TimerAccess NonEmpty
+    | Set of TimerSetPart NonEmptyList
+    | Reset of TimerAccess NonEmptyList
 
 and TimerSetPart = { expr: Expr option; access: TimerAccess }
-and TimerAccess = { id: ID; expressions: Expr NonEmpty }
+and TimerAccess = { id: ID; expressions: Expr NonEmptyList }
 
 and ProcedureCall = {
     cif: CIFCoordinates option
@@ -293,7 +293,7 @@ and TransitionOption = {
 
 and Answers =
     | A_Simple of answerPart: AnswerPart * elsePart: ElsePart
-    | A_Complex of mainAnswer: AnswerPart * otherAnswers: AnswerPart NonEmpty * elsePart: ElsePart option
+    | A_Complex of mainAnswer: AnswerPart * otherAnswers: AnswerPart NonEmptyList * elsePart: ElsePart option
 
 and Answer = Choice<RangeCondition, InformalText>
 and AnswerPart = {
@@ -332,7 +332,7 @@ and Output = {
     cif: CIFCoordinates option
     hyperlink: Hyperlink option
     endCIF: CIFEnd option
-    items: OutputItem NonEmpty
+    items: OutputItem NonEmptyList
     destination: PID
     //via: Via
 }
@@ -350,7 +350,7 @@ and ViaItem =
     | O_Gate of 
 *)
 
-and Arguments = Expr NonEmpty
+and Arguments = Expr NonEmptyList
 
 
 and Task = {
@@ -361,9 +361,9 @@ and Task = {
 }
 
 and TaskBody =
-    | TAssign of Assignment NonEmpty
-    | TInformal of InformalText NonEmpty
-    | TForLoop of ForLoop NonEmpty
+    | TAssign of Assignment NonEmptyList
+    | TInformal of InformalText NonEmptyList
+    | TForLoop of ForLoop NonEmptyList
 
 and ForLoop = {
     var: ID
@@ -414,7 +414,7 @@ and Expr =
     | Expr1 of Op1 * Expr
     | Expr2 of Op2 * Expr * Expr
     | ExprIFE of Expr * Expr * Expr
-    | ExprCall of func: Expr * args: Expr NonEmpty
+    | ExprCall of func: Expr * args: Expr NonEmptyList
     | ExprField of FieldAccess
 
 (*
