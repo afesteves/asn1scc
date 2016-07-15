@@ -155,9 +155,7 @@ namespace Asn1f2
                 Environment.Exit(Usage());
 
             if (sdlInputFiles.Any()) {
-                Console.WriteLine ("{");
-                PopulateSDL.buildAst(ParseSDLInputFiles (sdlInputFiles));
-                Console.WriteLine ("}");
+                PopulateSDL.modulesAst (ParseSDLInputFiles (sdlInputFiles));
                 return 0;
             }
 

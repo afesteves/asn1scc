@@ -9,20 +9,41 @@ type Filename = string
 type Sort = string
 type InformalText = String
 
-type PRFile = {
+type PRModules = PRFile list
+
+and PRFile = {
     clauses: UseClause list
     systems: System list
     processes: Process list
 }
 
-and UseClause    = { asn1: Filename Option; package: ID; uses: ID list }
-and System       = { id: ID; entities: SystemEntity list }
+and UseClause = { 
+    asn1: Filename option 
+    cifEnd: CIFEnd option
+    package: ID
+    uses: ID list 
+}
+
+and System = {
+    id: ID 
+    signals: Signal list
+    blocks: Block list
+    textAreas: TextArea list
+    procedures: Procedure list
+    channels: Channel list
+}
+
+and Block = {
+    id: ID
+    signals: Signal list
+    blocks: Block list
+    signalRoutes: SignalRoute list
+    connections: Connection list
+    processes: Process list
+}
+
 and Channel      = { id: ID; routes: Block   Route NonEmptyList }
 and SignalRoute  = { id: ID; routes: Process Route NonEmptyList }
-and Block        = { id: ID; entities: BlockEntity list }
-
-and SystemEntity = Choice<Signal, Block, TextArea, Procedure, Channel>
-and BlockEntity  = Choice<Signal, Block, SignalRoute, Connection, Process>
 
 and Connection = { channels: ID NonEmptyList; routes: ID NonEmptyList }
 and Signal = { 
@@ -108,7 +129,7 @@ and Start = {
     cif: CIFCoordinates option 
     hyperlink: Hyperlink option
     cifEnd: CIFEnd option
-    entryState: State
+    entryState: ID
     transition: Transition
 }
 
@@ -164,7 +185,7 @@ and ConnectPart = {
 and ContinuousSignal = {
     cif: CIFCoordinates option
     hyperlink: Hyperlink option
-    expr: Expr
+    guard: Expr
     priority: Priority option
     cifEnd: CIFEnd
     transition: Transition option
@@ -228,11 +249,11 @@ and ConnectionPoint = {
 
 // this is only the "basic input part" from SDL92
 and InputPart = {
-    cif: CIFCoordinates
-    hyperlink: Hyperlink
+    cif: CIFCoordinates option
+    hyperlink: Hyperlink option
     stimuli: Stimulus NonEmptyList
     cifEnd: CIFEnd
-    guard: Expr
+    guard: Expr option
     transition: Transition option
 }
 
@@ -504,4 +525,4 @@ and CIFEnd = {
     text: string
 }
 
-and Hyperlink = String
+and Hyperlink = string
