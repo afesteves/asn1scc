@@ -22,6 +22,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Commandlineparameters>/Users/alexandreesteves/lol.pr
+</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -95,7 +97,7 @@
       <Name>Antlr.SDL</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ast.SDL\Ast.SDL.fsproj">
-      <Project>{914DAE7D-2F7B-4F75-9A20-6BE6E6611742}</Project>
+      <Project>{3B67372A-65C7-439E-849F-CE1A1D2FCC69}</Project>
       <Name>Ast.SDL</Name>
     </ProjectReference>
   </ItemGroup>

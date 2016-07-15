@@ -8,38 +8,39 @@ open Antlr.SDL
 open Antlr.Runtime.Tree
 open Antlr.Runtime
 open FsUtils
+open FSharpx
 
-let inline fromAntlr (antlr: ^a when ^a: (static member toAst: ^a -> ^a')) : ^a' =
-    (^a: (static member toAst: ^a -> ^a') (antlr))
+type P = sdlParser
+let print x = printfn "%A" x
+(*
+let validator pred error value =
+    if pred value
+    then Choice1Of2 value
+    else Choice2Of2 (Collections.NonEmptyList
 
-let inline fromAntlrs antlrs = Seq.map fromAntlr antlrs
+type PRFileEntity = Choice<System, Process, UseClause>
 
-type Antlr = sdlParser
-type PRParse = {
-  tree: ITree
-  filename: string
-  tokens: IToken[]
-}
+let fileAst (tree: ITree, filename: string, tokens: IToken[]) = 
+  let system  (t: ITree) = Success 1
+  let clause  (t: ITree) = Success 2
+  let procezz (t: ITree) = Failure ["a"]
+                                                     
+  let entity(t: ITree) = 
+    match tree.Type with
+    | P.USE     -> clause(t)
+    | P.SYSTEM  -> system(t)
+    | P.PROCESS -> procezz(t) 
+    | _ -> err(SyntaxErr)
 
-type Antlr.pr_file_return with
-  static member toAst(): PRFile =
-      printfn "PARSING MA FILES"
-      {
-        clauses   = []
-        systems   = []
-        processes = []
-      }
+  printfn "%A" filename
+  match tree.Type with
+    | P.PR_FILE -> Seq.map entity tree.Children
+    | _ -> err(SyntaxErr)
 
-let buildFile (parse: PRParse) = 
-    printfn "WHYY"
-    Antlr.pr_file_return.toAst()
-
-let buildAst (files:(ITree*string*array<IToken>) seq) =
-    printfn "STUPID XAMARIN"
-    printfn "%A" <| Seq.length files
-    Seq.map (fun (t,s,ts) -> buildFile { tree = t; filename = s; tokens = ts }) files |> Seq.toList
-
-
+*)
+let buildAst (files: (ITree * string * IToken[]) seq) =
+    printfn "Building %A files" <| Seq.length files
+    //Seq.map fileAst files |> Seq.toList |> print
 
 (*
 and Terminator =

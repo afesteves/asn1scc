@@ -87,6 +87,7 @@ tokens {
         PAREN;
         PFPAR;
         POINT;
+        PR_FILE;
         PRIMARY;
         PROCEDURE;
         PROCEDURE_CALL;
@@ -149,6 +150,7 @@ pr_file
         :       (use_clause
                 | system_definition
                 | process_definition)+
+                -> ^(PR_FILE use_clause* system_definition* process_definition*)
         ;
 
 
