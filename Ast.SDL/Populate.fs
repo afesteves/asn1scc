@@ -42,16 +42,17 @@ let log = printfn "%s: %s"
 
 let warn = log "Warning"
 
-let err e =
-  log "Error" e
-  None
+let err<'a> e : 'a Attempt =
+    let wtf = (typedefof<'a>).Name
+    log ("Error building " + wtf) e
+    None
 
 let retrieve = Some
 
 
 //TODO: Remove
-let fails t = None
-let fail = None
+let fail() = err "FAIL"
+let fails t = err "FAILS"
 
 let attemptExpr = fails
 let attemptCIFEnd = fails
@@ -65,13 +66,13 @@ let attemptSignalRoute = fails
 let attemptASN1 (t: ITree): string Attempt = 
     t.Children.FirstOrNone() |> Option.map (fun c -> c.Text) 
 
-let attemptInt (t: ITree): int Attempt = fail
+let attemptInt (t: ITree): int Attempt = fail()
 
 let attemptString (label: int) (t: ITree) : string Attempt =
     if t.Type = label then Some t.Text else 
       match t.Children with
           | (x::xs) when x.Type = label -> Some x.Text
-          | _ -> None
+          | _ -> fail()
 
 let attemptID = attemptString P.ID
 let attemptSort = attemptString P.SORT
@@ -95,14 +96,14 @@ let attemptVariable t : Variable Attempt =
     ast {
         let! id = exactlyOne t P.ID attemptID
         let! st = exactlyOne t P.SORT attemptSort
-        return! fail
+        return! fail()
     }
 
 let attemptVarParameter t : VarParameter Attempt =
     ast {
         let! id = exactlyOne t P.ID attemptID
         let! st = exactlyOne t P.SORT attemptSort
-        let! pb = fail
+        let! pb = fail()
         return { id = id; sort = st; passBy = pb }
     }
 
@@ -110,14 +111,14 @@ let attemptVarDecl t : VarDecl Attempt =
     ast {
         let! id = exactlyOne t P.ID attemptID
         let! st = exactlyOne t P.SORT attemptSort
-        let! init = fail
+        let! init = fail()
         return { id = id; sort = st; init = init }
     }
 
 let attemptCIFCoords (t: ITree): CIFCoordinates Attempt =
     ast {
         let! x = exactlyOne t P.INT attemptInt
-        return! fail
+        return! fail()
     }
 
 let attemptTextArea t : TextArea Attempt =
@@ -131,7 +132,7 @@ let attemptClause t : UseClause Attempt =
     ast {
         let! asn = zeroOrOne t P.ASN1 attemptASN1
         let! ids = oneOrMore t P.ID attemptID
-        return { asn1 = asn; package = ids.Head; uses = ids.Tail; cifEnd = fail }
+        return { asn1 = asn; package = ids.Head; uses = ids.Tail; cifEnd = fail() }
     }
 
 let attemptLabel t : Label Attempt =
@@ -207,7 +208,7 @@ let attemptState t : State Attempt =
        //parts
        let! name    = zeroOrOne  t P.ID attemptID
        //ends
-       return! fail
+       return! fail()
     }
 
 let attemptSpontaneous t : SpontaneousTransition Attempt =
@@ -252,8 +253,8 @@ let attemptInputPart t : InputPart Attempt =
         let! coords = zeroOrOne t P.CIF attemptCIFCoords
         let! link   = zeroOrOne t P.HYPERLINK attemptHyperlink
         let! stim   = oneOrMore t P.STIMULUS attemptStimulus
-        let! cifEnd = fail
-        let! guard  = fail
+        let! cifEnd = fail()
+        let! guard  = fail()
         let! trans  = zeroOrOne t P.TRANSITION attemptTransition
         return { cif = coords; hyperlink = link; stimuli = stim; cifEnd = cifEnd; guard = guard; transition = trans }
     }
@@ -265,7 +266,7 @@ let attemptSignal (t: ITree): Signal Attempt =
         let! id = exactlyOne t P.ID attemptID
         let! ps = zeroOrMore t P.ID attemptID
         let! vs = zeroOrMore t P.ID attemptID
-        let! ce = exactlyOne t P.END attemptCIFEnd
+        let! ce = zeroOrOne t P.END attemptCIFEnd
         return { id = id; parameterNames = ps; vars = vs; cifEnd = ce }
     }
 

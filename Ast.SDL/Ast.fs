@@ -50,7 +50,7 @@ and Signal = {
     id: ID
     parameterNames: ID list
     vars: ID list
-    cifEnd: CIFEnd
+    cifEnd: CIFEnd option
 }
 
 and Route<'a>    = { source: 'a; dest: 'a; signals: Signal NonEmptyList }
@@ -72,8 +72,8 @@ and VarParameters = VarParameter list
 and Procedure = {
     cif: CIFCoordinates option
     id: ID
-    end1: CIFEnd
-    end2: CIFEnd
+    end1: CIFEnd option
+    end2: CIFEnd option
     parameters: VarParameters
     result: Result option
 //  something:
@@ -115,7 +115,7 @@ and Process = {
 //  instances: Instances
 //  instanceType:
     isReferenced: bool
-    cifEnd1: CIFEnd
+    cifEnd1: CIFEnd option
     cifEnd2: CIFEnd option
     parameters: Variables
 //  something:
@@ -146,8 +146,8 @@ and State = {
     body: StateBody
     parts: StatePart list
     name: ID option
-    cifEnd1: CIFEnd
-    cifEnd2: CIFEnd
+    cifEnd1: CIFEnd option
+    cifEnd2: CIFEnd option
 }
 
 and StateBody =
@@ -156,7 +156,7 @@ and StateBody =
 
 and StatePart = 
     | SP_Input of InputPart
-    | SP_Save of body: SaveBody * cifEnd: CIFEnd
+    | SP_Save of body: SaveBody * cifEnd: CIFEnd option
     | SP_Spontaneous of SpontaneousTransition
     | SP_ConnectPart of ConnectPart
     | SP_Continuous of ContinuousSignal
@@ -187,28 +187,28 @@ and ContinuousSignal = {
     hyperlink: Hyperlink option
     guard: Expr
     priority: Priority option
-    cifEnd: CIFEnd
+    cifEnd: CIFEnd option
     transition: Transition option
 }
 
 and Priority = {
     value: Expr
-    cifEnd: CIFEnd
+    cifEnd: CIFEnd option
 }
 
 and CompositeState = Choice<CompositeStateGraph, StateAggregation>
 
 and CompositeStateGraph = {
     name: ID
-    cifEnd1: CIFEnd
-    cifEnd2: CIFEnd
+    cifEnd1: CIFEnd option
+    cifEnd2: CIFEnd option
     points: ConnectionPoint list
     body: CompositeStateBody
 } 
 and StateAggregation = {
     name: ID
-    cifEnd1: CIFEnd
-    cifEnd2: CIFEnd
+    cifEnd1: CIFEnd option
+    cifEnd2: CIFEnd option
     entities: Choice<TextArea, Procedure> list
     body: StateAggregationBody
 }
@@ -244,7 +244,7 @@ and Direction = IN | OUT
 and ConnectionPoint = {
     direction: Direction
     states: ID NonEmptyList
-    cifEnd: CIFEnd
+    cifEnd: CIFEnd option
 }
 
 // this is only the "basic input part" from SDL92
@@ -252,7 +252,7 @@ and InputPart = {
     cif: CIFCoordinates option
     hyperlink: Hyperlink option
     stimuli: Stimulus NonEmptyList
-    cifEnd: CIFEnd
+    cifEnd: CIFEnd option
     guard: Expr option
     transition: Transition option
 }
@@ -291,7 +291,7 @@ and TimerAccess = { id: ID; expressions: Expr NonEmptyList }
 and ProcedureCall = {
     cif: CIFCoordinates option
     hyperlink: Hyperlink option
-    cifEnd: CIFEnd
+    cifEnd: CIFEnd option
     id: ID
     args: Arguments
 }
@@ -301,8 +301,8 @@ and Decision = {
     hyperlink: Hyperlink option
     question: Question option
     answers: Answers
-    cifEnd1: CIFEnd
-    cifEnd2: CIFEnd
+    cifEnd1: CIFEnd option
+    cifEnd2: CIFEnd option
 }
 
 and TransitionOption = {
@@ -378,7 +378,7 @@ and Task = {
     cif: CIFCoordinates option
     link: Hyperlink
     body: TaskBody
-    endCIF: CIFEnd
+    endCIF: CIFEnd option
 }
 
 and TaskBody =
@@ -516,7 +516,7 @@ and TerminatorStatement = {
     cif: CIFCoordinates option
     hyperlink: Hyperlink option
     terminator: Terminator
-    cifEnd: CIFEnd
+    cifEnd: CIFEnd option
 }
 
 and CIFEnd = {
