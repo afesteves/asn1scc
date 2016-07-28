@@ -15,29 +15,18 @@ open FSharpx.Validation
 open FSharpx.Collections
 open FSharpx.Option
 
-type P = sdlParser
+type P  = sdlParser
 let print x = printfn "%A" x
 let traverse f xs = mapM f (Seq.toList xs)
-let parse = MaybeBuilder()
 
-let proveNonEmpty xs =
+let asNonEmpty xs =
   match xs with
   | [] -> None
   | y :: ys -> NonEmptyList.create y ys |> Some
 
+//TODO: proper polymorphic implementations
+//type Parse<'a> = Parse of 'a option
 type Parse<'a> = 'a option
-  
-let exactlyOne <'a> (tree: ITree) (label: int) (builder: ITree -> 'a option): 'a option              = getOptionalChildByType(tree, label) |> Option.bind builder
-let zeroOrOne  <'a> (tree: ITree) (label: int) (builder: ITree -> 'a option): 'a option option       = getOptionalChildByType(tree, label) |> Option.map builder //|> sequence
-let zeroOrMore <'a> (tree: ITree) (label: int) (builder: ITree -> 'a option): 'a list option         = getChildrenByType(tree, label) |> traverse builder
-let oneOrMore  <'a> (tree: ITree) (label: int) (builder: ITree -> 'a option): 'a NonEmptyList option = zeroOrMore tree label builder |> Option.bind proveNonEmpty
-
-type Case<'a> = int * (ITree -> 'a Parse)
-let oneOf (t: ITree) (cases: 'a Case list) : 'a Parse = 
-    cases
-    |> Seq.filter (fun (label, _) -> t.Type = label)
-    |> Seq.tryHead 
-    |> Option.bind (fun (_ , builder) -> builder t)
 
 let log = printfn "%s: %s"
 
@@ -50,10 +39,36 @@ let err<'a> e : 'a Parse =
 
 let retrieve = Some
 
-
 //TODO: Remove
 let fail() = err "FAIL"
 let fails t = err "FAILS"
+
+type ParserBuilder() =
+  member this.Return x = Some x
+  member this.ReturnFrom px = px
+  member this.Bind(x: 'a Parse, f: 'a -> 'b Parse): 'b Parse =
+      let res = Option.bind f x
+      if res.IsNone then fail() else res
+
+let parse = ParserBuilder()
+
+let sequenceOption oox =
+    match oox with 
+    | Some ox -> Option.map Some ox
+    | None -> Some None 
+
+let exactlyOne <'a> (tree: ITree) (label: int) (builder: ITree -> 'a Parse): 'a Parse              = getOptionalChildByType(tree, label) |> Option.bind builder
+let zeroOrOne  <'a> (tree: ITree) (label: int) (builder: ITree -> 'a Parse): 'a option Parse       = getOptionalChildByType(tree, label) |> Option.map builder |> sequenceOption
+let zeroOrMore <'a> (tree: ITree) (label: int) (builder: ITree -> 'a Parse): 'a list Parse         = getChildrenByType(tree, label) |> traverse builder
+let oneOrMore  <'a> (tree: ITree) (label: int) (builder: ITree -> 'a Parse): 'a NonEmptyList Parse = zeroOrMore tree label builder |> Option.bind asNonEmpty
+
+type Case<'a> = int * (ITree -> 'a Parse)
+let oneOf (t: ITree) (cases: 'a Case list) : 'a Parse = 
+    cases
+    |> Seq.filter (fun (label, _) -> t.Type = label)
+    |> Seq.tryHead 
+    |> Option.bind (fun (_ , builder) -> builder t)
+
 
 let attemptExpr = fails
 let attemptCIFEnd = fails
