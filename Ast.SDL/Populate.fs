@@ -25,14 +25,15 @@ let proveNonEmpty xs =
   | [] -> None
   | y :: ys -> NonEmptyList.create y ys |> Some
 
-type Attempt<'a> = 'a option
+type Parse<'a> = 'a option
   
 let exactlyOne <'a> (tree: ITree) (label: int) (builder: ITree -> 'a option): 'a option              = getOptionalChildByType(tree, label) |> Option.bind builder
 let zeroOrOne  <'a> (tree: ITree) (label: int) (builder: ITree -> 'a option): 'a option option       = getOptionalChildByType(tree, label) |> Option.map builder //|> sequence
 let zeroOrMore <'a> (tree: ITree) (label: int) (builder: ITree -> 'a option): 'a list option         = getChildrenByType(tree, label) |> traverse builder
 let oneOrMore  <'a> (tree: ITree) (label: int) (builder: ITree -> 'a option): 'a NonEmptyList option = zeroOrMore tree label builder |> Option.bind proveNonEmpty
 
-let oneOf (t: ITree) (cases: (int * (ITree -> 'a Attempt)) list) : 'a Attempt = 
+type Case<'a> = int * (ITree -> 'a Parse)
+let oneOf (t: ITree) (cases: 'a Case list) : 'a Parse = 
     cases
     |> Seq.filter (fun (label, _) -> t.Type = label)
     |> Seq.tryHead 
@@ -42,7 +43,7 @@ let log = printfn "%s: %s"
 
 let warn = log "Warning"
 
-let err<'a> e : 'a Attempt =
+let err<'a> e : 'a Parse =
     let wtf = (typedefof<'a>).Name
     log ("Error building " + wtf) e
     None
@@ -63,12 +64,12 @@ let attemptProcedure  = fails
 let attemptTerminator = fails
 let attemptSignalRoute = fails
 
-let attemptASN1 (t: ITree): string Attempt = 
+let attemptASN1 (t: ITree): string Parse = 
     t.Children.FirstOrNone() |> Option.map (fun c -> c.Text) 
 
-let attemptInt (t: ITree): int Attempt = fail()
+let attemptInt (t: ITree): int Parse = fail()
 
-let attemptString (label: int) (t: ITree) : string Attempt =
+let attemptString (label: int) (t: ITree) : string Parse =
     if t.Type = label then Some t.Text else 
       match t.Children with
           | (x::xs) when x.Type = label -> Some x.Text
@@ -78,28 +79,28 @@ let attemptID = attemptString P.ID
 let attemptSort = attemptString P.SORT
 let attemptHyperlink = attemptString P.HYPERLINK
 
-let attemptPassBy (t:ITree) : PassBy Attempt = 
+let attemptPassBy (t:ITree) : PassBy Parse = 
     match t.Text with
     | "In" -> Some In
     | "Out" -> Some Out
     | "InOut" -> Some InOut
     | _ -> err "INVALID"
 
-let attemptResult (t: ITree) : Result Attempt =
+let attemptResult (t: ITree) : Result Parse =
     ast {
         let! id = zeroOrOne  t P.ID attemptID
         let! st = exactlyOne t P.SORT attemptSort
         return { id = id; sort = st }
     }
 
-let attemptVariable t : Variable Attempt = 
+let attemptVariable t : Variable Parse = 
     ast {
         let! id = exactlyOne t P.ID attemptID
         let! st = exactlyOne t P.SORT attemptSort
         return! fail()
     }
 
-let attemptVarParameter t : VarParameter Attempt =
+let attemptVarParameter t : VarParameter Parse =
     ast {
         let! id = exactlyOne t P.ID attemptID
         let! st = exactlyOne t P.SORT attemptSort
@@ -107,7 +108,7 @@ let attemptVarParameter t : VarParameter Attempt =
         return { id = id; sort = st; passBy = pb }
     }
 
-let attemptVarDecl t : VarDecl Attempt =
+let attemptVarDecl t : VarDecl Parse =
     ast {
         let! id = exactlyOne t P.ID attemptID
         let! st = exactlyOne t P.SORT attemptSort
@@ -115,27 +116,27 @@ let attemptVarDecl t : VarDecl Attempt =
         return { id = id; sort = st; init = init }
     }
 
-let attemptCIFCoords (t: ITree): CIFCoordinates Attempt =
+let attemptCIFCoords (t: ITree): CIFCoordinates Parse =
     ast {
         let! x = exactlyOne t P.INT attemptInt
         return! fail()
     }
 
-let attemptTextArea t : TextArea Attempt =
+let attemptTextArea t : TextArea Parse =
     ast {
         let! cif = exactlyOne t P.CIF attemptCIFCoords
         let! ctn = zeroOrOne  t P.TEXTAREA_CONTENT attemptContent
         return { cif = cif; content = ctn }
     }
      
-let attemptClause t : UseClause Attempt =
+let attemptClause t : UseClause Parse =
     ast {
         let! asn = zeroOrOne t P.ASN1 attemptASN1
         let! ids = oneOrMore t P.ID attemptID
         return { asn1 = asn; package = ids.Head; uses = ids.Tail; cifEnd = fail() }
     }
 
-let attemptLabel t : Label Attempt =
+let attemptLabel t : Label Parse =
     ast {
         let! cif = exactlyOne t P.CIF attemptCIFCoords
         let! cnt = exactlyOne t P.ID attemptID
@@ -152,7 +153,7 @@ let attemptExport = fails
 let attemptTimer = fails
 let attemptProcedureCall = fails
 
-let attemptAction t : Action Attempt =
+let attemptAction t : Action Parse =
     ast {
         let! label = zeroOrOne  t P.LABEL attemptLabel
         let! body  = oneOf t [
@@ -162,7 +163,7 @@ let attemptAction t : Action Attempt =
         return { label = label; body = body }
     }
 
-let attemptTerminatorStatement t : TerminatorStatement Attempt =
+let attemptTerminatorStatement t : TerminatorStatement Parse =
     ast {
         let! label  = zeroOrOne  t P.LABEL attemptLabel
         let! coords = zeroOrOne  t P.CIF attemptCIFCoords
@@ -172,7 +173,7 @@ let attemptTerminatorStatement t : TerminatorStatement Attempt =
         return { label = label; cif = coords; hyperlink = link; terminator = term; cifEnd = cifEnd }
     }
 
-let attemptTransition t : Transition Attempt =
+let attemptTransition t : Transition Parse =
     ast {
         let! label   = zeroOrOne  t P.LABEL attemptLabel
         let! actions = oneOrMore  t P.ACTION attemptAction
@@ -180,7 +181,7 @@ let attemptTransition t : Transition Attempt =
         return { label = label; actions = actions; statement = stmt }
     }
 
-let attemptStart t : Start Attempt =
+let attemptStart t : Start Parse =
     ast {
         let! coords = zeroOrOne  t P.CIF attemptCIFCoords
         let! link   = zeroOrOne  t P.HYPERLINK attemptHyperlink
@@ -191,7 +192,7 @@ let attemptStart t : Start Attempt =
     }
 
 
-let attemptFreeAction t : FreeAction Attempt = 
+let attemptFreeAction t : FreeAction Parse = 
    ast {
        let! coords  = zeroOrOne  t P.CIF attemptCIFCoords
        let! link    = zeroOrOne  t P.HYPERLINK attemptHyperlink
@@ -200,7 +201,7 @@ let attemptFreeAction t : FreeAction Attempt =
        return { cif = coords; hyperlink = link; connector = conn; transition = trans }
    }
 
-let attemptState t : State Attempt =
+let attemptState t : State Parse =
     ast {
        let! coords  = zeroOrOne  t P.CIF attemptCIFCoords
        let! link    = zeroOrOne  t P.HYPERLINK attemptHyperlink
@@ -211,7 +212,7 @@ let attemptState t : State Attempt =
        return! fail()
     }
 
-let attemptSpontaneous t : SpontaneousTransition Attempt =
+let attemptSpontaneous t : SpontaneousTransition Parse =
     ast {
         let! coords = zeroOrOne  t P.CIF attemptCIFCoords
         let! link   = zeroOrOne  t P.HYPERLINK attemptHyperlink
@@ -221,7 +222,7 @@ let attemptSpontaneous t : SpontaneousTransition Attempt =
         return { cif = coords; hyperlink = link; cifEnd = cifEnd; guard = guard; transition = trans }
     }
 
-let attemptConnectPart t : ConnectPart Attempt =
+let attemptConnectPart t : ConnectPart Parse =
     ast {
         let! coords = zeroOrOne  t P.CIF attemptCIFCoords
         let! link   = zeroOrOne  t P.HYPERLINK attemptHyperlink
@@ -230,7 +231,7 @@ let attemptConnectPart t : ConnectPart Attempt =
         return { cif = coords; hyperlink = link; cifEnd = cifEnd; transition = trans }
     }
 
-let attemptContinuous t : ContinuousSignal Attempt = 
+let attemptContinuous t : ContinuousSignal Parse = 
     ast {
         let! coords = zeroOrOne  t P.CIF attemptCIFCoords
         let! link   = zeroOrOne  t P.HYPERLINK attemptHyperlink
@@ -241,14 +242,14 @@ let attemptContinuous t : ContinuousSignal Attempt =
         return { cif = coords; hyperlink = link; cifEnd = cifEnd; transition = trans; guard = guard; priority = prty }
     }
 
-let attemptStimulus t : Stimulus Attempt =
+let attemptStimulus t : Stimulus Parse =
     ast {
         let! id = exactlyOne t P.ID attemptID
         let! vs = zeroOrMore t P.ID attemptID
         return { id = id; vars = vs }
     }
 
-let attemptInputPart t : InputPart Attempt =
+let attemptInputPart t : InputPart Parse =
     ast {
         let! coords = zeroOrOne t P.CIF attemptCIFCoords
         let! link   = zeroOrOne t P.HYPERLINK attemptHyperlink
@@ -261,7 +262,7 @@ let attemptInputPart t : InputPart Attempt =
 
 let attemptProcess (t: ITree) = err "hopeless"
 
-let attemptSignal (t: ITree): Signal Attempt =
+let attemptSignal (t: ITree): Signal Parse =
     ast {
         let! id = exactlyOne t P.ID attemptID
         let! ps = zeroOrMore t P.ID attemptID
@@ -270,14 +271,14 @@ let attemptSignal (t: ITree): Signal Attempt =
         return { id = id; parameterNames = ps; vars = vs; cifEnd = ce }
     }
 
-let attemptConnection (t: ITree): Connection Attempt =
+let attemptConnection (t: ITree): Connection Parse =
     ast {
         let! cs = oneOrMore t P.ID attemptID
         let! rs = oneOrMore t P.ID attemptID
         return { channels = cs; routes = rs }
     }
 
-let rec attemptBlock (t:ITree): Block Attempt =
+let rec attemptBlock (t:ITree): Block Parse =
     ast {
         let! id = exactlyOne t P.ID attemptID
         let! ss = zeroOrMore t P.SIGNAL attemptSignal
@@ -288,7 +289,7 @@ let rec attemptBlock (t:ITree): Block Attempt =
         return { id = id; signals = ss; blocks = bs; signalRoutes = rs; connections = cs; processes = ps }
     }
 
-let attemptSystem  (t: ITree): System Attempt = 
+let attemptSystem  (t: ITree): System Parse = 
     ast {
         let! id = exactlyOne t P.ID attemptID
         let! ss = zeroOrMore t P.SIGNAL attemptSignal
@@ -300,7 +301,7 @@ let attemptSystem  (t: ITree): System Attempt =
         return { id = id; signals = ss; blocks = bs; textAreas = ts; procedures = ps; channels = cs } 
     }
 
-let fileAst (tree: ITree, filename: string, tokens: IToken[]): PRFile Attempt =  
+let fileAst (tree: ITree, filename: string, tokens: IToken[]): PRFile Parse =  
   printfn "%A" filename
   match tree.Type with
     | P.PR_FILE ->
@@ -312,7 +313,7 @@ let fileAst (tree: ITree, filename: string, tokens: IToken[]): PRFile Attempt =
         }
     | _ -> err "SYNTAX"
 
-let modulesAst (files: (ITree * string * IToken[]) seq): PRModules Attempt =
+let modulesAst (files: (ITree * string * IToken[]) seq): PRModules Parse =
     Seq.length files |> printfn "Building %A files"
     let attempt = traverse fileAst files
     print attempt
