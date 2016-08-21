@@ -46,7 +46,7 @@ let attemptPassBy (t:ITree) : PassBy Parse =
     | "In" -> pure In
     | "Out" -> pure Out
     | "InOut" -> pure InOut
-    | _ -> err "INVALID"
+    | _ -> error "INVALID"
     
 let attemptResult t =
     pure Result 
@@ -192,7 +192,7 @@ let attemptInputPart t =
       <*> fail()
       <*> zeroOrOne t P.TRANSITION attemptTransition
 
-let attemptProcess t = err "hopeless"
+let attemptProcess t = fails "hopeless"
 
 let attemptSignal t =
     pure Signal 
@@ -234,7 +234,7 @@ let fileAst (tree: ITree, filename: string, tokens: IToken[]): PRFile Parse =
           <*> zeroOrMore tree P.SYSTEM attemptSystem
           <*> zeroOrMore tree P.PROCESS attemptProcess
           
-    | _ -> err "SYNTAX"
+    | _ -> fails "SYNTAX"
 
 let modulesAst (files: (ITree * string * IToken[]) seq): PRModules Parse =
     Seq.length files |> printfn "Building %A files"
