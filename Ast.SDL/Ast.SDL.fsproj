@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3B67372A-65C7-439E-849F-CE1A1D2FCC69}</ProjectGuid>
+    <ProjectGuid>{914dae7d-2f7b-4f75-9a20-6be6e6611742}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>AstSDL</RootNamespace>
     <AssemblyName>AstSDL</AssemblyName>
@@ -33,6 +33,26 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\AstSDL.XML</DocumentationFile>
   </PropertyGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0' Or $(OS) == 'Unix'">
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+  <ItemGroup>
+    <Compile Include="Ast.fs" />
+    <Compile Include="Constructors.fs" />
+    <Compile Include="Parse.fs" />
+    <Compile Include="Populate.fs" />
+    <None Include="packages.config" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="antlr.runtime">
       <HintPath>..\Antlr.SDL\antlr313\antlr.runtime.dll</HintPath>
@@ -65,13 +85,6 @@
     <Reference Include="FSharpx.Extras">
       <HintPath>..\packages\FSharpx.Extras.1.10.3\lib\40\FSharpx.Extras.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Ast.fs" />
-    <Compile Include="Constructors.fs" />
-    <Compile Include="Populate.fs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Antlr.SDL\Antlr.SDL.csproj">
       <Name>Antlr.SDL</Name>
       <Project>{A1882F1D-5185-407C-8227-1E2B69BAADE9}</Project>
@@ -81,22 +94,6 @@
       <Name>Ast</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Choose>
-    <When Condition="'$(VisualStudioVersion)' == '11.0' Or $(OS) == 'Unix'">
-      <PropertyGroup>
-        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <PropertyGroup>
-        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
-  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.
 	<Target Name="BeforeBuild">
