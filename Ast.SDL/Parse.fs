@@ -16,71 +16,83 @@ let castTree (x:ITree) =
   | :? CommonTree as x' -> Some x'
   | _ -> None
 
-let asNonEmpty xs =
-  match xs with
-  | [] -> None
-  | y :: ys -> NonEmptyList.create y ys |> Some
+type CurrentChild = int
+type Parse<'a> = Parse of (ITree * CurrentChild -> 'a option * CurrentChild)
 
-type Parse<'a> = Parse of 'a option
-
-let wrap x = Parse x
-let unwrap (Parse x) = x
+let mapF = (<<)
+let pureF x _ = x
+let inline pure x = Parse (fun (t,c) -> (Some x, c))
 
 let log = printfn "%s: %s"
 
 let warn = log "Warning"
 
-let error x =
-    printfn "%s" x
-    Parse None
+let run (Parse f) (tree, child) : ('a option * int) = 
+  match f (tree, child) with
+  | (Some a, c) -> 
+    printfn "PARSED %A" a
+    (Some a, c)
+  | (None, c) -> 
+    let funcType = typeof<Microsoft.FSharp.Core.FSharpFunc<_,_>>
+    let parsingType = typeof<'a>
 
-let fail' <'a> e : 'a Parse =
-    let name = typeof<'a>.ToString()
-    log ("Error building " + name) e
-    Parse None
+    if funcType.Name = parsingType.Name 
+    then (None, c)
+    else
+      let name = parsingType.ToString()
+      let parentToken = castTree tree |> Option.map (fun t' -> t'.Token.Text) |> Option.getOrElse "|UNKNOWN|"
+      printfn "Error at line %A, inside %A while building %A" tree.Line parentToken name
+      (None, c)
 
-let fail t = fail' "FAIL"
+let map f (Parse g) = Parse (g >> fun (x,c) -> (Option.map f x, c))
 
-let check (tree: ITree) (Parse x) : 'a Parse =
-  if x.IsSome
-  then Parse x
-  else
-   let name = typeof<'a>.ToString()
-   let parentToken: string = castTree tree |> Option.map (fun t -> t.Token.Text) |> Option.getOrElse "|UNKNOWN|"
-   sprintf "Error at line %A, inside %A while building %A"  tree.Line parentToken name |> error
+let (|>>) p f = map f p
 
-let inline pure x = Parse (Some x)
+let (<*>) pf px =
+  Parse (fun (t,c) ->
+    match (run pf (t,c)) with
+    | (Some f, c') -> run px (t,c') |> fun (x,c) -> (Option.map f x, c)
+    | (None, c') -> (None, c')
+  )
 
-let map f (Parse x) = Parse (Option.map f x)
+let (>>=) p f =
+  Parse (fun (t,c) ->
+    match (run p (t,c)) with
+    | (Some x, c') -> run (f x) (t, c')
+    | (None, c') -> (None, c')
+  )
 
-let (<*>) (Parse f) (Parse x) : Parse<'b> =
-  match (f, x) with
-  | Some(f'), Some(x') -> f' x' |> pure 
-  | _,_ -> Parse None
+let cons x xs = x :: xs
+let lift2 f x y = pure f <*> x <*> y
 
-let sequence (op : 'a Parse option) : 'a option Parse =
-    match op with 
-    | Some p -> map Some p
-    | None -> pure None
+let rec sequence (parsers: 'a Parse list) : 'a list Parse = 
+  List.foldBack (lift2 cons) parsers (pure []) 
 
-let traverseOption  (f: 'a -> 'b Parse) (op: 'a option) : 'b option Parse = Option.map f op |> sequence 
-let traverseSeq     (f: 'a -> 'b Parse) (xs: 'a seq)    : 'b list Parse   = mapM (f >> unwrap) (Seq.toList xs) |> Parse
+let traverse f = List.map f >> sequence
 
-let bind (f: 'a -> 'b Parse) (Parse x: 'a Parse) : 'b Parse = 
-  match x with
-  | Some(x') -> f x'
-  | None -> Parse None
+let (<|>) pa pb =
+  Parse (fun (t,c) -> 
+    match (run pa (t,c)) with
+    | (Some a, c') -> (Some a, c')
+    | (None, c')   -> run pb (t,c)
+  )
 
-let exactlyOne <'a> (tree: ITree) (label: int) (builder: ITree -> 'a Parse): 'a Parse              = getOptionalChildByType(tree, label) |> wrap |> bind builder |> check tree
-let zeroOrOne  <'a> (tree: ITree) (label: int) (builder: ITree -> 'a Parse): 'a option Parse       = getOptionalChildByType(tree, label) |> traverseOption builder |> check tree
-let zeroOrMore <'a> (tree: ITree) (label: int) (builder: ITree -> 'a Parse): 'a list Parse         = getChildrenByType(tree, label) |> traverseSeq builder |> check tree
-let oneOrMore  <'a> (tree: ITree) (label: int) (builder: ITree -> 'a Parse): 'a NonEmptyList Parse = zeroOrMore tree label builder |> bind (asNonEmpty >> wrap) |> check tree
+let one token (Parse f) = 
+    Parse (fun (t,c) -> 
+      let consumed = List.skip c (getTreeChildren t)
+                  |> List.tryFind (fun t' -> t'.Type = token)
+      
+      match consumed with
+      | Some t' -> f (t', 0) |> fun (x, _) -> (x, t'.ChildIndex + 1)
+      | None -> (None, c)
+    )
 
-(*
-type Case<'a> = int * (ITree -> 'a Parse)
-let oneOf (t: ITree) (cases: 'a Case list) : 'a Parse = 
-    cases
-    |> Seq.filter (fun (label, _) -> t.Type = label)
-    |> Seq.tryHead 
-    |> Option.bind (fun (_ , builder) -> builder t)
-*)
+let opt token parser = (one token parser |>> Some) <|> pure None
+
+let rec many  token parser = (one token parser >>= (fun h -> many token parser |>> (fun t -> cons h t))) <|> pure [] 
+
+let rec many1 token parser = lift2 NonEmptyList.create (one token parser) (many token parser)
+
+let recursive fp = Parse (fun t -> run (fp()) t)
+
+let fail = Parse (fun (t,c) -> (None, c))

@@ -9,8 +9,6 @@ type Filename = string
 type Sort = string
 type InformalText = String
 
-type PRModules = PRFile list
-
 and PRFile = {
     clauses: UseClause list
     systems: System list

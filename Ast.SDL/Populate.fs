@@ -1,5 +1,5 @@
 ﻿module PopulateSDL
-
+open System
 open System.Linq
 open System.Numerics
 open Ast
@@ -18,82 +18,79 @@ open FSharpx
 type P = sdlParser
 
 let attemptExpr = fail
+let attemptPassBy = fail
 let attemptCIFEnd = fail
 let attemptChannel = fail
 let attemptContent = fail
 let attemptPriority = fail
-let attemptProcedure  = fail
+let attemptProcedure = fail
 let attemptTerminator = fail
 let attemptSignalRoute = fail
 
-let attemptASN1 (t: ITree): string Parse = 
-    t.Children.FirstOrNone() |> wrap |> Parse.map (fun c -> c.Text) 
+let attemptASN1 = Parse(fun (t,s) -> 
+  (t.Children.FirstOrNone() |> Option.map (fun c -> c.Text), s))
 
-let attemptInt (t: ITree): int Parse = fail()
+let attemptInt = fail
 
-let attemptString (label: int) (t: ITree) : string Parse =
-    if t.Type = label then pure t.Text else 
+let attemptString (label: int) =
+  Parse (fun (t,s) -> 
+    if t.Type = label then (Some t.Text, s) else 
       match t.Children with
-          | (x::xs) when x.Type = label -> pure x.Text
-          | _ -> fail()
+      | (x::xs) when x.Type = label -> (Some x.Text, s)
+      | _ -> (None, s)
+   )
 
 let attemptID = attemptString P.ID
 let attemptSort = attemptString P.SORT
 let attemptHyperlink = attemptString P.HYPERLINK
-
-let attemptPassBy (t:ITree) : PassBy Parse = 
-    match t.Text with
-    | "In" -> pure In
-    | "Out" -> pure Out
-    | "InOut" -> pure InOut
-    | _ -> error "INVALID"
     
-let attemptResult t =
+let attemptResult =
     pure Result 
-      <*> zeroOrOne  t P.ID attemptID
-      <*> exactlyOne t P.SORT attemptSort
+      <*> opt P.ID attemptID
+      <*> one P.SORT attemptSort
 
-let attemptVariable t = 
+let attemptVariable = 
     pure Variable
-      <*> exactlyOne t P.ID attemptID
-      <*> exactlyOne t P.SORT attemptSort
+      <*> one P.ID attemptID
+      <*> one P.SORT attemptSort
 
-let attemptVarParameter t =
+let attemptVarParameter =
     pure VarParameter
-      <*> exactlyOne t P.ID attemptID
-      <*> exactlyOne t P.SORT attemptSort
-      <*> fail()
+      <*> one P.ID attemptID
+      <*> one P.SORT attemptSort
+      <*> fail
 
-let attemptVarDecl t =
+let attemptVarDecl =
     pure VarDecl 
-      <*> exactlyOne t P.ID attemptID
-      <*> exactlyOne t P.SORT attemptSort
-      <*> fail()
+      <*> one P.ID attemptID
+      <*> one P.SORT attemptSort
+      <*> fail
 
-let attemptCIFCoords t = 
+let attemptCIFCoords = 
     pure CIFCoordinates 
-      <*> exactlyOne t P.INT attemptInt
-      <*> fail()
-      <*> fail()
-      <*> fail()
+      <*> one P.INT attemptInt
+      <*> fail
+      <*> fail
+      <*> fail
 
-let attemptTextArea t =
+let attemptTextArea =
     pure TextArea
-      <*> exactlyOne t P.CIF attemptCIFCoords
-      <*> zeroOrOne  t P.TEXTAREA_CONTENT attemptContent
+      <*> one P.CIF attemptCIFCoords
+      <*> opt P.TEXTAREA_CONTENT attemptContent
      
-let attemptClause t =
+let attemptClause =
     pure UseClause
-      <*> zeroOrOne t P.ASN1 attemptASN1
-      <*> fail()
-      <*> exactlyOne t P.ID attemptID
-      <*> zeroOrMore t P.ID attemptID
+      <*> opt P.ASN1 attemptASN1
+      <*> pure None
+      <*> one P.ID attemptID
+      <*> many P.ID attemptID
     
-let attemptLabel t =
+let attemptLabel =
     pure Label
-      <*> exactlyOne t P.CIF attemptCIFCoords
-      <*> exactlyOne t P.ID attemptID
+      <*> one P.CIF attemptCIFCoords
+      <*> one P.ID attemptID
 
+(*
 let attemptTask = fail
 let attemptTaskBody = fail
 let attemptOutput = fail
@@ -103,142 +100,143 @@ let attemptTransitionOption = fail
 let attemptExport = fail
 let attemptTimer = fail
 let attemptProcedureCall = fail
-
+*)
 let attemptAction = fail
 (*
 let attemptAction t : Action Parse =
     pure Action
-      <*> zeroOrOne  t P.LABEL attemptLabel
+      <*> opt  t P.LABEL attemptLabel
       <*> oneOf t [
             P.TASK,  attemptTask;
             P.TIMER, attemptTimer
         ]
 *)      
 
-let attemptTerminatorStatement t =
+let attemptTerminatorStatement =
     pure TerminatorStatement 
-      <*> zeroOrOne  t P.LABEL attemptLabel
-      <*> zeroOrOne  t P.CIF attemptCIFCoords
-      <*> zeroOrOne  t P.HYPERLINK attemptHyperlink
-      <*> exactlyOne t P.TERMINATOR attemptTerminator
-      <*> exactlyOne t P.END attemptCIFEnd
+      <*> opt P.LABEL attemptLabel
+      <*> opt P.CIF attemptCIFCoords
+      <*> opt P.HYPERLINK attemptHyperlink
+      <*> one P.TERMINATOR attemptTerminator
+      <*> opt P.END attemptCIFEnd
 
-let attemptTransition t =
+let attemptTransition =
     pure Transition
-      <*> zeroOrOne  t P.LABEL attemptLabel
-      <*> oneOrMore  t P.ACTION attemptAction
-      <*> exactlyOne t P.TERMINATOR attemptTerminatorStatement
+      <*> opt P.LABEL attemptLabel
+      <*> many1 P.ACTION attemptAction
+      <*> one P.TERMINATOR attemptTerminatorStatement
 
-let attemptStart t =
+let attemptStart =
     pure Start
-      <*> zeroOrOne  t P.CIF attemptCIFCoords
-      <*> zeroOrOne  t P.HYPERLINK attemptHyperlink
-      <*> zeroOrOne  t P.END attemptCIFEnd
-      <*> exactlyOne t P.ID attemptID
-      <*> exactlyOne t P.TRANSITION attemptTransition
+      <*> opt P.CIF attemptCIFCoords
+      <*> opt P.HYPERLINK attemptHyperlink
+      <*> opt P.END attemptCIFEnd
+      <*> one P.ID attemptID
+      <*> one P.TRANSITION attemptTransition
 
-let attemptFreeAction t =
+let attemptFreeAction =
     pure FreeAction
-      <*> zeroOrOne  t P.CIF attemptCIFCoords
-      <*> zeroOrOne  t P.HYPERLINK attemptHyperlink
-      <*> zeroOrOne  t P.ID attemptID
-      <*> exactlyOne t P.TRANSITION attemptTransition
+      <*> opt P.CIF attemptCIFCoords
+      <*> opt P.HYPERLINK attemptHyperlink
+      <*> opt P.ID attemptID
+      <*> one P.TRANSITION attemptTransition
 
-let attemptState t =
+let attemptState =
     pure State
-      <*> zeroOrOne  t P.CIF attemptCIFCoords
-      <*> zeroOrOne  t P.HYPERLINK attemptHyperlink
-      <*> fail()
-      <*> fail()
-      <*> zeroOrOne  t P.ID attemptID
-      <*> fail()
-      <*> fail()
+      <*> opt P.CIF attemptCIFCoords
+      <*> opt P.HYPERLINK attemptHyperlink
+      <*> fail
+      <*> fail
+      <*> opt P.ID attemptID
+      <*> fail
+      <*> fail
 
-let attemptSpontaneous t =
+let attemptSpontaneous =
     pure SpontaneousTransition
-      <*> zeroOrOne  t P.CIF attemptCIFCoords
-      <*> zeroOrOne  t P.HYPERLINK attemptHyperlink
-      <*> zeroOrOne  t P.END attemptCIFEnd
-      <*> exactlyOne t P.PROVIDED attemptExpr
-      <*> exactlyOne t P.TRANSITION attemptTransition
+      <*> opt P.CIF attemptCIFCoords
+      <*> opt P.HYPERLINK attemptHyperlink
+      <*> opt P.END attemptCIFEnd
+      <*> one P.PROVIDED attemptExpr
+      <*> one P.TRANSITION attemptTransition
       
-let attemptConnectPart t = 
+let attemptConnectPart = 
     pure ConnectPart 
-      <*> zeroOrOne  t P.CIF attemptCIFCoords
-      <*> zeroOrOne  t P.HYPERLINK attemptHyperlink
-      <*> zeroOrOne  t P.END attemptCIFEnd
-      <*> zeroOrOne  t P.TRANSITION attemptTransition
+      <*> opt P.CIF attemptCIFCoords
+      <*> opt P.HYPERLINK attemptHyperlink
+      <*> opt P.END attemptCIFEnd
+      <*> opt P.TRANSITION attemptTransition
 
-let attemptContinuous t =
+let attemptContinuous =
     pure ContinuousSignal 
-      <*> zeroOrOne  t P.CIF attemptCIFCoords
-      <*> zeroOrOne  t P.HYPERLINK attemptHyperlink
-      <*> exactlyOne t P.PROVIDED attemptExpr
-      <*> zeroOrOne  t P.PRIORITY attemptPriority
-      <*> exactlyOne t P.END attemptCIFEnd      
-      <*> zeroOrOne  t P.TRANSITION attemptTransition
+      <*> opt P.CIF attemptCIFCoords
+      <*> opt P.HYPERLINK attemptHyperlink
+      <*> one P.PROVIDED attemptExpr
+      <*> opt P.PRIORITY attemptPriority
+      <*> opt P.END attemptCIFEnd      
+      <*> opt P.TRANSITION attemptTransition
            
-let attemptStimulus t =
+let attemptStimulus =
     pure Stimulus
-      <*> exactlyOne t P.ID attemptID
-      <*> zeroOrMore t P.ID attemptID
+      <*> one P.ID attemptID
+      <*> many P.ID attemptID
 
-let attemptInputPart t = 
+let attemptInputPart = 
     pure InputPart 
-      <*> zeroOrOne t P.CIF attemptCIFCoords
-      <*> zeroOrOne t P.HYPERLINK attemptHyperlink
-      <*> oneOrMore t P.STIMULUS attemptStimulus
-      <*> fail()
-      <*> fail()
-      <*> zeroOrOne t P.TRANSITION attemptTransition
+      <*> opt P.CIF attemptCIFCoords
+      <*> opt P.HYPERLINK attemptHyperlink
+      <*> many1 P.STIMULUS attemptStimulus
+      <*> fail
+      <*> fail
+      <*> opt P.TRANSITION attemptTransition
 
-let attemptProcess t = fail()
+let attemptProcess = fail
 
-let attemptSignal t =
+let attemptSignal =
     pure Signal 
-      <*> exactlyOne t P.ID attemptID
-      <*> zeroOrMore t P.ID attemptID
-      <*> zeroOrMore t P.ID attemptID
-      <*> zeroOrOne t P.END attemptCIFEnd
+      <*> one P.ID attemptID
+      <*> many P.ID attemptID
+      <*> many P.ID attemptID
+      <*> opt P.END attemptCIFEnd
 
-let attemptConnection t =
+let attemptConnection =
     pure Connection
-      <*> oneOrMore t P.ID attemptID
-      <*> oneOrMore t P.ID attemptID
+      <*> many1 P.ID attemptID
+      <*> many1 P.ID attemptID
 
-let rec attemptBlock t =
+
+let rec attemptBlock' () =
     pure Block
-      <*> exactlyOne t P.ID attemptID
-      <*> zeroOrMore t P.SIGNAL attemptSignal
-      <*> zeroOrMore t P.BLOCK attemptBlock
-      <*> zeroOrMore t P.SIGNALROUTE attemptSignalRoute
-      <*> zeroOrMore t P.CONNECTION attemptConnection
-      <*> zeroOrMore t P.PROCESS attemptProcess
+      <*> one P.ID attemptID
+      <*> many P.SIGNAL attemptSignal
+      <*> many P.BLOCK (recursive attemptBlock')
+      <*> many P.SIGNALROUTE attemptSignalRoute
+      <*> many P.CONNECTION attemptConnection
+      <*> many P.PROCESS attemptProcess
 
-let attemptSystem t =
+let attemptBlock = attemptBlock'()
+
+let attemptSystem =
     warn "yolo"
     pure System
-      <*> exactlyOne t P.ID attemptID
-      <*> zeroOrMore t P.SIGNAL attemptSignal
-      <*> zeroOrMore t P.BLOCK attemptBlock
-      <*> zeroOrMore t P.TEXTAREA attemptTextArea
-      <*> zeroOrMore t P.PROCESS attemptProcedure
-      <*> zeroOrMore t P.CHANNEL attemptChannel
+      <*> one P.ID attemptID
+      <*> many P.SIGNAL attemptSignal
+      <*> many P.BLOCK attemptBlock
+      <*> many P.TEXTAREA attemptTextArea
+      <*> many P.PROCESS attemptProcedure
+      <*> many P.CHANNEL attemptChannel
 
-let fileAst (tree: ITree, filename: string, tokens: IToken[]): PRFile Parse =  
-  printfn "%A" filename
-  match tree.Type with
-    | P.PR_FILE ->
-        pure PRFile 
-          <*> zeroOrMore tree P.USE attemptClause
-          <*> zeroOrMore tree P.SYSTEM attemptSystem
-          <*> zeroOrMore tree P.PROCESS attemptProcess
-          
-    | _ -> fail()
+let attemptPRFile =
+  pure PRFile
+    <*> sequence [one P.USE attemptClause]
+    <*> fail//many P.SYSTEM attemptSystem
+    <*> fail//many P.PROCESS attemptProcess
 
-let modulesAst (files: (ITree * string * IToken[]) seq): PRModules Parse =
-    Seq.length files |> printfn "Building %A files"
-    let attempt = traverseSeq fileAst files
-    print attempt
-    attempt
-    //traverse fileAst files
+let attemptFile (file: ITree * string * IToken[]) =
+  let (t, _, _) = file
+  if t.Type = P.PR_FILE then run attemptPRFile (t, 0) |> fst else None
+    
+let modulesAst (files: (ITree * string * IToken[]) seq): PRFile option seq =
+  Seq.length files |> printfn "Building %A files"
+  let res = Seq.map attemptFile files
+  print res
+  res
