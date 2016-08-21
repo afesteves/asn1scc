@@ -5,11 +5,10 @@ open FsUtils
 open FSharpx
 open FSharpx.Collections
 open FSharpx.Option
+open Utils
 
 #nowarn "0046"
 #nowarn "1189"
-
-let print x = printfn "%A" x
 
 let castTree (x:ITree) =
   match x with
@@ -19,8 +18,6 @@ let castTree (x:ITree) =
 type CurrentChild = int
 type Parse<'a> = Parse of (ITree * CurrentChild -> 'a option * CurrentChild)
 
-let mapF = (<<)
-let pureF x _ = x
 let inline pure x = Parse (fun (t,c) -> (Some x, c))
 
 let log = printfn "%s: %s"
@@ -62,7 +59,7 @@ let (>>=) p f =
     | (None, c') -> (None, c')
   )
 
-let cons x xs = x :: xs
+
 let lift2 f x y = pure f <*> x <*> y
 
 let rec sequence (parsers: 'a Parse list) : 'a list Parse = 
@@ -96,3 +93,5 @@ let rec many1 token parser = lift2 NonEmptyList.create (one token parser) (many 
 let recursive fp = Parse (fun t -> run (fp()) t)
 
 let fail = Parse (fun (t,c) -> (None, c))
+
+let choice ps = Seq.fold (<|>) fail ps
