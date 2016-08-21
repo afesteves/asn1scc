@@ -45,8 +45,8 @@ and SignalRoute  = { id: ID; routes: Process Route NonEmptyList }
 
 and Connection = { channels: ID NonEmptyList; routes: ID NonEmptyList }
 and Signal = { 
-    id: ID
     parameterNames: ID list
+    id: ID
     vars: ID list
     cifEnd: CIFEnd option
 }

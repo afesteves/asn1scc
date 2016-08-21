@@ -8,7 +8,7 @@ let Block id signals blocks signalRoutes connections processes : Block = { id=id
 let Channel id routes : Channel = { id=id; routes=routes }
 let SignalRoute id routes : SignalRoute = { id=id; routes=routes }
 let Connection channels routes : Connection = { channels=channels; routes=routes }
-let Signal id parameterNames vars cifEnd : Signal = { id=id; parameterNames=parameterNames; vars=vars; cifEnd=cifEnd }
+let Signal parameterNames id vars cifEnd : Signal = { parameterNames=parameterNames; id=id; vars=vars; cifEnd=cifEnd }
 let CIFCoordinates x width y height : CIFCoordinates = { x=x; width=width; y=y; height=height }
 let Variable id sort : Variable = { id=id; sort=sort }
 let VarParameter id sort passBy : VarParameter = { id=id; sort=sort; passBy=passBy }

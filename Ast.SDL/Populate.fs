@@ -81,7 +81,7 @@ let attemptTextArea =
 let attemptClause =
     pure UseClause
       <*> opt P.ASN1 attemptASN1
-      <*> pure None
+      <*> opt P.END attemptCIFEnd
       <*> one P.ID attemptID
       <*> many P.ID attemptID
     
@@ -190,12 +190,12 @@ let attemptInputPart =
       <*> opt P.TRANSITION attemptTransition
 
 let attemptProcess = fail
-
+  
 let attemptSignal =
     pure Signal 
+      <*> (many P.PARAMNAMES (many P.ID attemptID) |>> List.concat)
       <*> one P.ID attemptID
-      <*> many P.ID attemptID
-      <*> many P.ID attemptID
+      <*> (many P.PARAMS (many P.ID attemptID) |>> List.concat)
       <*> opt P.END attemptCIFEnd
 
 let attemptConnection =
@@ -216,7 +216,6 @@ let rec attemptBlock' () =
 let attemptBlock = attemptBlock'()
 
 let attemptSystem =
-    warn "yolo"
     pure System
       <*> one P.ID attemptID
       <*> many P.SIGNAL attemptSignal
@@ -227,9 +226,9 @@ let attemptSystem =
 
 let attemptPRFile =
   pure PRFile
-    <*> sequence [one P.USE attemptClause]
-    <*> fail//many P.SYSTEM attemptSystem
-    <*> fail//many P.PROCESS attemptProcess
+    <*> many P.USE attemptClause
+    <*> many P.SYSTEM attemptSystem
+    <*> many P.PROCESS attemptProcess
 
 let attemptFile (file: ITree * string * IToken[]) =
   let (t, _, _) = file
