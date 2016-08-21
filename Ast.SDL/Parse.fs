@@ -39,9 +39,7 @@ let fail' <'a> e : 'a Parse =
     log ("Error building " + name) e
     Parse None
 
-
-let fails t = fail' "FAIL"
-let fail () = fail' "FAIL"
+let fail t = fail' "FAIL"
 
 let check (tree: ITree) (Parse x) : 'a Parse =
   if x.IsSome

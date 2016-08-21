@@ -17,14 +17,14 @@ open FSharpx
 
 type P = sdlParser
 
-let attemptExpr = fails
-let attemptCIFEnd = fails
-let attemptChannel = fails
-let attemptContent = fails
-let attemptPriority = fails
-let attemptProcedure  = fails
-let attemptTerminator = fails
-let attemptSignalRoute = fails
+let attemptExpr = fail
+let attemptCIFEnd = fail
+let attemptChannel = fail
+let attemptContent = fail
+let attemptPriority = fail
+let attemptProcedure  = fail
+let attemptTerminator = fail
+let attemptSignalRoute = fail
 
 let attemptASN1 (t: ITree): string Parse = 
     t.Children.FirstOrNone() |> wrap |> Parse.map (fun c -> c.Text) 
@@ -94,17 +94,17 @@ let attemptLabel t =
       <*> exactlyOne t P.CIF attemptCIFCoords
       <*> exactlyOne t P.ID attemptID
 
-let attemptTask = fails
-let attemptTaskBody = fails
-let attemptOutput = fails
-let attemptCreateRequest = fails
-let attemptDecision = fails
-let attemptTransitionOption = fails
-let attemptExport = fails
-let attemptTimer = fails
-let attemptProcedureCall = fails
+let attemptTask = fail
+let attemptTaskBody = fail
+let attemptOutput = fail
+let attemptCreateRequest = fail
+let attemptDecision = fail
+let attemptTransitionOption = fail
+let attemptExport = fail
+let attemptTimer = fail
+let attemptProcedureCall = fail
 
-let attemptAction = fails
+let attemptAction = fail
 (*
 let attemptAction t : Action Parse =
     pure Action
@@ -148,11 +148,11 @@ let attemptState t =
     pure State
       <*> zeroOrOne  t P.CIF attemptCIFCoords
       <*> zeroOrOne  t P.HYPERLINK attemptHyperlink
-      <*> fails()
-      <*> fails()
+      <*> fail()
+      <*> fail()
       <*> zeroOrOne  t P.ID attemptID
-      <*> fails()
-      <*> fails()
+      <*> fail()
+      <*> fail()
 
 let attemptSpontaneous t =
     pure SpontaneousTransition
@@ -192,7 +192,7 @@ let attemptInputPart t =
       <*> fail()
       <*> zeroOrOne t P.TRANSITION attemptTransition
 
-let attemptProcess t = fails "hopeless"
+let attemptProcess t = fail()
 
 let attemptSignal t =
     pure Signal 
@@ -234,7 +234,7 @@ let fileAst (tree: ITree, filename: string, tokens: IToken[]): PRFile Parse =
           <*> zeroOrMore tree P.SYSTEM attemptSystem
           <*> zeroOrMore tree P.PROCESS attemptProcess
           
-    | _ -> fails "SYNTAX"
+    | _ -> fail()
 
 let modulesAst (files: (ITree * string * IToken[]) seq): PRModules Parse =
     Seq.length files |> printfn "Building %A files"
