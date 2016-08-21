@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2633C5D7-E468-42D9-B25B-3C5EEBB4D536}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,36 +12,42 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antlr", "Antlr\Antlr.csproj", "{A1882F1D-5185-407C-8227-1E2B69BAADE9}"
 EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Ast", "Ast\Ast.fsproj", "{3B67372A-65C7-439E-849F-CE1A1D2FCC69}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Ast", "Ast\Ast.fsproj", "{3B67372A-65C7-439E-849F-CE1A1D2FCC69}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asn1f2", "Asn1f2\Asn1f2.csproj", "{9FC95EBA-A745-4C0D-BF4E-53497E066D1C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{914DAE7D-2F7B-4F75-9A20-6BE6E6611742} = {914DAE7D-2F7B-4F75-9A20-6BE6E6611742}
+	EndProjectSection
 EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Backend2.ST", "Backend2.ST\Backend2.ST.fsproj", "{D451F135-4104-4441-99C1-5C1A6B7C2F91}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Backend2.ST", "Backend2.ST\Backend2.ST.fsproj", "{D451F135-4104-4441-99C1-5C1A6B7C2F91}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4112E7C9-0E9C-41DB-88C3-D5911C1D89D5} = {4112E7C9-0E9C-41DB-88C3-D5911C1D89D5}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "parseStg2", "parseStg2\parseStg2.csproj", "{4112E7C9-0E9C-41DB-88C3-D5911C1D89D5}"
 EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Backend2", "Backend2\Backend2.fsproj", "{000896AE-1E52-4120-8394-0E5E07A8F194}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Backend2", "Backend2\Backend2.fsproj", "{000896AE-1E52-4120-8394-0E5E07A8F194}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4112E7C9-0E9C-41DB-88C3-D5911C1D89D5} = {4112E7C9-0E9C-41DB-88C3-D5911C1D89D5}
 	EndProjectSection
 EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Backend.c", "Backend.c\Backend.c.fsproj", "{62BFC3E2-6DC8-4EEE-BCD6-F5634369E57B}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Backend.c", "Backend.c\Backend.c.fsproj", "{62BFC3E2-6DC8-4EEE-BCD6-F5634369E57B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4112E7C9-0E9C-41DB-88C3-D5911C1D89D5} = {4112E7C9-0E9C-41DB-88C3-D5911C1D89D5}
 	EndProjectSection
 EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Backend.c.ST", "Backend.c.ST\Backend.c.ST.fsproj", "{821BE302-634C-465E-9F9A-19DDCA139C9F}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Backend.c.ST", "Backend.c.ST\Backend.c.ST.fsproj", "{821BE302-634C-465E-9F9A-19DDCA139C9F}"
 EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "ST", "ST\ST.fsproj", "{94495D92-B615-4745-B26B-A5EC73A6A462}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ST", "ST\ST.fsproj", "{94495D92-B615-4745-B26B-A5EC73A6A462}"
 EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "AntlrUtils", "AntlrUtils\AntlrUtils.fsproj", "{DB416047-7207-4816-8DB6-2182BE2E1104}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AntlrUtils", "AntlrUtils\AntlrUtils.fsproj", "{DB416047-7207-4816-8DB6-2182BE2E1104}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antlr.SDL", "Antlr.SDL\Antlr.SDL.csproj", "{15A9A3B2-E3C9-4BD9-9D43-E156D1854BAD}"
 EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Ast.SDL", "Ast.SDL\Ast.SDL.fsproj", "{914DAE7D-2F7B-4F75-9A20-6BE6E6611742}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Ast.SDL", "Ast.SDL\Ast.SDL.fsproj", "{914DAE7D-2F7B-4F75-9A20-6BE6E6611742}"
+	ProjectSection(ProjectDependencies) = postProject
+		{15A9A3B2-E3C9-4BD9-9D43-E156D1854BAD} = {15A9A3B2-E3C9-4BD9-9D43-E156D1854BAD}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
