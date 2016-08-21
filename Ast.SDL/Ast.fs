@@ -25,8 +25,8 @@ and UseClause = {
 and System = {
     id: ID 
     signals: Signal list
-    blocks: Block list
     textAreas: TextArea list
+    blocks: Block list
     procedures: Procedure list
     channels: Channel list
 }

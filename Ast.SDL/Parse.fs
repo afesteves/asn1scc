@@ -76,8 +76,10 @@ let (<|>) pa pb =
 
 let one token (Parse f) = 
     Parse (fun (t,c) -> 
-      let consumed = List.skip c (getTreeChildren t)
-                  |> List.tryFind (fun t' -> t'.Type = token)
+      let consumed =
+        List.skip c (getTreeChildren t)
+        |> head
+        |> Option.filter (fun t' -> t'.Type = token)
       
       match consumed with
       | Some t' -> f (t', 0) |> fun (x, _) -> (x, t'.ChildIndex + 1)
@@ -94,4 +96,46 @@ let recursive fp = Parse (fun t -> run (fp()) t)
 
 let fail = Parse (fun (t,c) -> (None, c))
 
+/// Need better name
+let rec many' parser = (parser >>= (fun h -> many' parser |>> (fun t -> cons h t))) <|> pure []
+
 let choice ps = Seq.fold (<|>) fail ps
+
+let choice2 (a, b) =
+        (a |>> Choice1Of2)
+    <|> (b |>> Choice2Of2)
+
+let choice3 (a, b, c) =
+        (a |>> Choice1Of3)
+    <|> (b |>> Choice2Of3)
+    <|> (c |>> Choice3Of3)
+
+let choice4 (a, b, c, d) =
+        (a |>> Choice1Of4)
+    <|> (b |>> Choice2Of4)
+    <|> (c |>> Choice3Of4)
+    <|> (d |>> Choice4Of4)
+
+let choice5 (a, b, c, d, e) =
+        (a |>> Choice1Of5)
+    <|> (b |>> Choice2Of5)
+    <|> (c |>> Choice3Of5)
+    <|> (d |>> Choice4Of5)
+    <|> (e |>> Choice5Of5)
+
+let choice6 (a, b, c, d, e, f) =
+        (a |>> Choice1Of6)
+    <|> (b |>> Choice2Of6)
+    <|> (c |>> Choice3Of6)
+    <|> (d |>> Choice4Of6)
+    <|> (e |>> Choice5Of6)
+    <|> (f |>> Choice6Of6)
+
+let choice7 (a, b, c, d, e, f, g) =
+        (a |>> Choice1Of7)
+    <|> (b |>> Choice2Of7)
+    <|> (c |>> Choice3Of7)
+    <|> (d |>> Choice4Of7)
+    <|> (e |>> Choice5Of7)
+    <|> (f |>> Choice6Of7)
+    <|> (g |>> Choice7Of7)

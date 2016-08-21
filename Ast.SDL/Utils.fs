@@ -5,7 +5,14 @@ let print x = printfn "%A" x
 
 let cons x xs = x :: xs
 
-let partitionsWith baseCase recursion xs = List.fold recursion baseCase xs
+let flip f x y = f y x
+
+let head =
+  function
+  | [] -> None
+  | (x :: _) -> Some x
+
+let partitionsWith baseCase recursion xs = List.foldBack (flip recursion) xs baseCase
 
 let partitions2 xs = xs |> partitionsWith ([], []) (fun (a,b) -> 
     function

@@ -21,10 +21,10 @@ type P = sdlParser
 let attemptExpr = fail
 let attemptPassBy = fail
 let attemptCIFEnd = fail
-let attemptChannel = fail
+let attemptChannel: Channel Parse = fail
 let attemptContent = fail
 let attemptPriority = fail
-let attemptProcedure = fail
+let attemptProcedure: Procedure Parse = fail
 let attemptTerminator = fail
 let attemptSignalRoute = fail
 
@@ -216,14 +216,18 @@ let rec attemptBlock' () =
 
 let attemptBlock = attemptBlock'()
 
+let attemptSystemEntity =
+  choice5
+    ( one P.SIGNAL attemptSignal
+    , one P.BLOCK attemptBlock
+    , one P.TEXTAREA attemptTextArea
+    , one P.PROCEDURE attemptProcedure
+    , one P.CHANNEL attemptChannel)
+
 let attemptSystem =
-    pure System
+    pure (fun i (ss, bs, ts, ps, cs) -> System i ss bs ts ps cs)
       <*> one P.ID attemptID
-      <*> many P.SIGNAL attemptSignal
-      <*> many P.BLOCK attemptBlock
-      <*> many P.TEXTAREA attemptTextArea
-      <*> many P.PROCESS attemptProcedure
-      <*> many P.CHANNEL attemptChannel
+      <*> (many' attemptSystemEntity |>> partitions5)
 
 let attemptPRFile =
   pure PRFile
