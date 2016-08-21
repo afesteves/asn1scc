@@ -46,9 +46,7 @@ let fails t = err "FAILS"
 type ParserBuilder() =
   member this.Return x = Some x
   member this.ReturnFrom px = px
-  member this.Bind(x: 'a Parse, f: 'a -> 'b Parse): 'b Parse =
-      let res = Option.bind f x
-      if res.IsNone then fail() else res
+  member this.Bind(x: 'a Parse, f: 'a -> 'b Parse): 'b Parse = Option.bind f x
 
 let parse = ParserBuilder()
 
