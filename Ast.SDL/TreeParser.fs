@@ -15,15 +15,15 @@ let castTree (x:ITree) =
   | _ -> None
 
 type CurrentChild = int
-type Parse<'a> = Parse of (ITree * CurrentChild -> 'a option * CurrentChild)
+type Parser<'a> = Parser of (ITree * CurrentChild -> 'a option * CurrentChild)
 
-let inline pure x = Parse (fun (t,c) -> (Some x, c))
+let inline pure x = Parser (fun (t,c) -> (Some x, c))
 
 let log = printfn "%s: %s"
 
 let warn = log "Warning"
 
-let run (Parse f) (tree, child) : ('a option * int) = 
+let run (Parser f) (tree, child) : ('a option * int) =
   match f (tree, child) with
   | (Some a, c) -> 
     printfn "PARSED %A" a
@@ -40,19 +40,19 @@ let run (Parse f) (tree, child) : ('a option * int) =
       printfn "Error at line %A, inside %A while building %A" tree.Line parentToken name
       (None, c)
 
-let map f (Parse g) = Parse (g >> fun (x,c) -> (Option.map f x, c))
+let map f (Parser g) = Parser (g >> fun (x,c) -> (Option.map f x, c))
 
 let (|>>) p f = map f p
 
 let (<*>) pf px =
-  Parse (fun (t,c) ->
+  Parser (fun (t,c) ->
     match (run pf (t,c)) with
     | (Some f, c') -> run px (t,c') |> fun (x,c) -> (Option.map f x, c)
     | (None, c') -> (None, c')
   )
 
 let (>>=) p f =
-  Parse (fun (t,c) ->
+  Parser (fun (t,c) ->
     match (run p (t,c)) with
     | (Some x, c') -> run (f x) (t, c')
     | (None, c') -> (None, c')
@@ -61,21 +61,21 @@ let (>>=) p f =
 
 let lift2 f x y = pure f <*> x <*> y
 
-let rec sequence (parsers: 'a Parse list) : 'a list Parse = 
+let rec sequence (parsers: 'a Parser list) : 'a list Parser =
   List.foldBack (lift2 cons) parsers (pure []) 
 
 let traverse f = List.map f >> sequence
 
 let (<|>) pa pb =
-  Parse (fun (t,c) -> 
+  Parser (fun (t,c) ->
     match (run pa (t,c)) with
     | (Some a, c') -> (Some a, c')
     | (None, c')   -> run pb (t,c)
   )
 
 let one w =
-    let (token, Parse f) = w()
-    Parse (fun (t,c) -> 
+    let (token, Parser f) = w()
+    Parser (fun (t,c) -> 
       let consumed =
         List.skip c (getTreeChildren t)
         |> head
@@ -86,9 +86,9 @@ let one w =
       | None -> (None, c)
     )
 
-let recursive fp = Parse (fun t -> run (fp()) t)
+let recursive fp = Parser (fun t -> run (fp()) t)
 
-let fail = Parse (fun (t,c) -> (None, c))
+let fail = Parser (fun (t,c) -> (None, c))
 
 let opt w = (one w |>> Some) <|> pure None
 let rec many w = (one w >>= (fun h -> many w |>> (fun t -> cons h t))) <|> pure []

@@ -16,20 +16,20 @@ type P = sdlParser
 let attemptExpr = fail
 let attemptPassBy = fail
 let attemptCIFEnd = fail
-let attemptChannel: Channel Parse = fail
+let attemptChannel: Channel Parser = fail
 let attemptContent = fail
 let attemptPriority = fail
-let attemptProcedure: Procedure Parse = fail
+let attemptProcedure: Procedure Parser = fail
 let attemptTerminator = fail
 let attemptSignalRoute = fail
 
-let attemptASN1 = Parse(fun (t,s) -> 
+let attemptASN1 = Parser(fun (t,s) ->
   (head t.Children |> Option.map (fun c -> c.Text), s))
 
 let attemptInt = fail
 
 let rec attemptString (label: int) =
-  Parse (fun (t,s) -> 
+  Parser (fun (t,s) ->
     if t.Type = label then (Some t.Text, s) else 
       match t.Children with
       | (x::xs) when x.Type = label -> (Some x.Text, s)
