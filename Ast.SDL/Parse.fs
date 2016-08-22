@@ -74,7 +74,8 @@ let (<|>) pa pb =
     | (None, c')   -> run pb (t,c)
   )
 
-let one token (Parse f) = 
+let one w =
+    let (token, Parse f) = w()
     Parse (fun (t,c) -> 
       let consumed =
         List.skip c (getTreeChildren t)
@@ -86,15 +87,23 @@ let one token (Parse f) =
       | None -> (None, c)
     )
 
-let opt token parser = (one token parser |>> Some) <|> pure None
-
-let rec many  token parser = (one token parser >>= (fun h -> many token parser |>> (fun t -> cons h t))) <|> pure [] 
-
-let rec many1 token parser = lift2 NonEmptyList.create (one token parser) (many token parser)
-
 let recursive fp = Parse (fun t -> run (fp()) t)
 
 let fail = Parse (fun (t,c) -> (None, c))
+
+let opt w = (one w |>> Some) <|> pure None
+let rec many w = (one w >>= (fun h -> many w |>> (fun t -> cons h t))) <|> pure []
+let rec many1 w = lift2 NonEmptyList.create (one w) (many w)
+
+/// Need better name
+let rec _many parser = (parser >>= (fun h -> _many parser |>> (fun t -> cons h t))) <|> pure []
+
+let groups2 p = _many p |>> partitions2
+let groups3 p = _many p |>> partitions3
+let groups4 p = _many p |>> partitions4
+let groups5 p = _many p |>> partitions5
+let groups6 p = _many p |>> partitions6
+let groups7 p = _many p |>> partitions7
 
 /// Need better name
 let rec many' parser = (parser >>= (fun h -> many' parser |>> (fun t -> cons h t))) <|> pure []
