@@ -2,7 +2,7 @@
 
 open Ast
 open Constructors
-open Parse
+open TreeParser
 open Utils
 open AstSDL
 open Antlr.SDL

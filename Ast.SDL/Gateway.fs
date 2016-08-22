@@ -3,7 +3,7 @@
 open Antlr.Runtime.Tree
 open Antlr.Runtime
 open AstSDL
-open Parse
+open TreeParser
 open PopulateSDL
 open Utils
 

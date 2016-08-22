@@ -1,4 +1,4 @@
-﻿module Parse
+﻿module TreeParser
 
 open Antlr.Runtime.Tree
 open FsUtils
