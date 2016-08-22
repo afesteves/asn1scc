@@ -1,17 +1,12 @@
 ﻿module PopulateSDL
-open System
-open System.Linq
-open System.Numerics
+
 open Ast
 open Constructors
 open Parse
 open Utils
 open AstSDL
 open Antlr.SDL
-open Antlr.Runtime.Tree
-open Antlr.Runtime
 open FsUtils
-open FSharpx
 
 #nowarn "0046"
 #nowarn "1189"
@@ -29,7 +24,7 @@ let attemptTerminator = fail
 let attemptSignalRoute = fail
 
 let attemptASN1 = Parse(fun (t,s) -> 
-  (t.Children.FirstOrNone() |> Option.map (fun c -> c.Text), s))
+  (head t.Children |> Option.map (fun c -> c.Text), s))
 
 let attemptInt = fail
 
@@ -261,13 +256,3 @@ and PARAMNAMES _ = (P.PARAMNAMES, many ID)
 and PARAMS _ = (P.PARAMS, many ID)
 and USE _ = (P.USE, attemptClause)
 and SYSTEM _ = (P.SYSTEM, attemptSystem)
-
-let attemptFile (file: ITree * string * IToken[]) =
-  let (t, _, _) = file
-  if t.Type = P.PR_FILE then run attemptPRFile (t, 0) |> fst else None
-    
-let modulesAst (files: (ITree * string * IToken[]) seq): PRFile option seq =
-  Seq.length files |> printfn "Building %A files"
-  let res = Seq.map attemptFile files
-  print res
-  res

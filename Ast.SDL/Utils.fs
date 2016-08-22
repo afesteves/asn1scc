@@ -1,5 +1,4 @@
 ﻿module Utils
-open FSharp.Reflection
 
 let print x = printfn "%A" x
 

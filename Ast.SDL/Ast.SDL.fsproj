@@ -52,6 +52,7 @@
     <Compile Include="Constructors.fs" />
     <Compile Include="Parse.fs" />
     <Compile Include="Populate.fs" />
+    <Compile Include="Gateway.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

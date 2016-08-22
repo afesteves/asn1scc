@@ -1,7 +1,5 @@
 ﻿module AstSDL
 
-//type PLACEHOLDER = int
-
 open FSharpx.Collections
 
 type ID = string

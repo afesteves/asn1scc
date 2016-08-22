@@ -4,7 +4,6 @@ open Antlr.Runtime.Tree
 open FsUtils
 open FSharpx
 open FSharpx.Collections
-open FSharpx.Option
 open Utils
 
 #nowarn "0046"
