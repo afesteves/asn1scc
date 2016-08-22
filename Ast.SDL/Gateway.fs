@@ -4,7 +4,7 @@ open Antlr.Runtime.Tree
 open Antlr.Runtime
 open AstSDL
 open TreeParser
-open PopulateSDL
+open Parsers
 open Utils
 
 let attemptFile (file: ITree * string * IToken[]) =

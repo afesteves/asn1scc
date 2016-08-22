@@ -51,7 +51,7 @@
     <Compile Include="Ast.fs" />
     <Compile Include="Constructors.fs" />
     <Compile Include="TreeParser.fs" />
-    <Compile Include="Populate.fs" />
+    <Compile Include="Parsers.fs" />
     <Compile Include="Gateway.fs" />
     <None Include="packages.config" />
   </ItemGroup>
