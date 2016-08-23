@@ -38,8 +38,10 @@ and Block = {
     processes: Process list
 }
 
-and Channel      = { id: ID; routes: Block   Route NonEmptyList }
-and SignalRoute  = { id: ID; routes: Process Route NonEmptyList }
+and Route = { source: ID; dest: ID; signals: ID NonEmptyList }
+
+and Channel      = { id: ID; routes: Route NonEmptyList }
+and SignalRoute  = { id: ID; routes: Route NonEmptyList }
 
 and Connection = { channels: ID NonEmptyList; routes: ID NonEmptyList }
 and Signal = { 
@@ -48,8 +50,6 @@ and Signal = {
     vars: ID list
     cifEnd: CIFEnd option
 }
-
-and Route<'a>    = { source: 'a; dest: 'a; signals: Signal NonEmptyList }
 
 and CIFCoordinates = { 
     x: int; width: int

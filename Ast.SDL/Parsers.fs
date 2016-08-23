@@ -16,12 +16,11 @@ type P = sdlParser
 let attemptExpr = fail
 let attemptPassBy = fail
 let attemptCIFEnd = fail
-let attemptChannel: Channel Parser = fail
+
 let attemptContent = fail
 let attemptPriority = fail
 let attemptProcedure: Procedure Parser = fail
 let attemptTerminator = fail
-let attemptSignalRoute = fail
 
 let attemptASN1 = Parser(fun (t,s) ->
   (head t.Children |> Option.map (fun c -> c.Text), s))
@@ -39,7 +38,23 @@ let rec attemptString (label: int) =
 and attemptID = attemptString P.ID
 and attemptSort = attemptString P.SORT
 and attemptHyperlink = attemptString P.HYPERLINK
-    
+
+and attemptRoute =
+    pure Route
+      <*> one ID
+      <*> one ID
+      <*> many1 ID
+
+and attemptChannel =
+    pure Channel
+      <*> one ID
+      <*> many1 ROUTE
+
+and attemptSignalRoute =
+    pure SignalRoute
+      <*> one ID
+      <*> many1 ROUTE
+
 and attemptResult =
     pure Result
       <*> opt ID 
@@ -232,6 +247,7 @@ and attemptPRFile =
 and ID _ = (P.ID, attemptID)
 and SIGNAL _ = (P.SIGNAL, attemptSignal)
 and BLOCK _ = (P.BLOCK, recursive attemptBlock')
+and ROUTE _ = (P.ROUTE, attemptRoute)
 and SIGNALROUTE _ = (P.SIGNALROUTE, attemptSignalRoute)
 and CONNECTION _ = (P.CONNECTION, attemptConnection)
 and PROCESS _ = (P.PROCESS, attemptProcess)

@@ -6,6 +6,7 @@ let PRFile clauses systems processes : PRFile = { clauses=clauses; systems=syste
 let UseClause asn1 cifEnd package uses : UseClause = { asn1=asn1; cifEnd=cifEnd; package=package; uses=uses }
 let System id signals blocks textAreas procedures channels : System = { id=id; signals=signals; blocks=blocks; textAreas=textAreas; procedures=procedures; channels=channels }
 let Block id signals blocks signalRoutes connections processes : Block = { id=id; signals=signals; blocks=blocks; signalRoutes=signalRoutes; connections=connections; processes=processes }
+let Route source dest signals : Route = { source=source; dest=dest; signals=signals }
 let Channel id routes : Channel = { id=id; routes=routes }
 let SignalRoute id routes : SignalRoute = { id=id; routes=routes }
 let Connection channels routes : Connection = { channels=channels; routes=routes }
