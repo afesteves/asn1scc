@@ -43,7 +43,7 @@ and Route = { source: ID; dest: ID; signals: ID NonEmptyList }
 and Channel      = { id: ID; routes: Route NonEmptyList }
 and SignalRoute  = { id: ID; routes: Route NonEmptyList }
 
-and Connection = { channels: ID NonEmptyList; routes: ID NonEmptyList }
+and Connection = { channel: ID; route: ID }
 and Signal = { 
     parameterNames: ID list
     id: ID

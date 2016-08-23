@@ -211,17 +211,21 @@ and attemptSignal =
 
 and attemptConnection =
     pure Connection
-      <*> many1 ID
-      <*> many1 ID
+      <*> one ID
+      <*> one ID
+
+and attemptBlockEntity =
+  choice5
+    ( one SIGNAL
+    , one BLOCK
+    , one SIGNALROUTE
+    , one CONNECTION
+    , one PROCESS)
 
 and attemptBlock' () =
-    pure Block
+    pure (fun i (ss, bs, rs, cs, ps) -> Block i ss bs rs cs ps)
       <*> one ID
-      <*> many SIGNAL
-      <*> many BLOCK
-      <*> many SIGNALROUTE
-      <*> many CONNECTION
-      <*> many PROCESS
+      <*> groups5 attemptBlockEntity
 
 and attemptBlock = attemptBlock'()
 
