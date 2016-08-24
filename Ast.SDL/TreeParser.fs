@@ -14,8 +14,11 @@ let castTree (x:ITree) =
   | :? CommonTree as x' -> Some x'
   | _ -> None
 
-type CurrentChild = int
-type Parser<'a> = Parser of (ITree * CurrentChild -> 'a option * CurrentChild)
+type ChildIdentifier = int
+type ParserInput = ITree
+type ParserState = ChildIdentifier
+type ParserOutput <'a> = 'a option
+type Parser <'a> = Parser of (ParserInput * ParserState -> 'a ParserOutput * ParserState)
 
 let inline pure x = Parser (fun (t,c) -> (Some x, c))
 
