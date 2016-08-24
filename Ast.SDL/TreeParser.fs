@@ -15,52 +15,46 @@ let castTree (x:ITree) =
   | _ -> None
 
 type ChildIdentifier = int
+type ParserError = string
 type ParserInput = ITree
 type ParserState = ChildIdentifier
-type ParserOutput <'a> = 'a option
-type Parser <'a> = Parser of (ParserInput * ParserState -> 'a ParserOutput * ParserState)
+type ParserResult <'a> = Choice<'a, ParserError>
+type Parser <'a> = Parser of (ParserInput * ParserState -> 'a ParserResult * ParserState)
 
-let inline pure x = Parser (fun (t,c) -> (Some x, c))
+let (|Output|Error|) (r: 'a ParserResult) =
+    match r with
+    | Choice1Of2 o -> Output o
+    | Choice2Of2 e -> Error e
 
-let log = printfn "%s: %s"
+let Output = Choice1Of2
+let Error = Choice2Of2
 
-let warn = log "Warning"
+let mapResult (f: 'a -> 'b) (r: 'a ParserResult) : 'b ParserResult =
+  match r with
+  | Output o -> Output (f o)
+  | Error e -> Error e
 
-let run (Parser f) (tree, child) : ('a option * int) =
-  match f (tree, child) with
-  | (Some a, c) -> 
-    printfn "PARSED %A" a
-    (Some a, c)
-  | (None, c) -> 
-    let funcType = typeof<Microsoft.FSharp.Core.FSharpFunc<_,_>>
-    let parsingType = typeof<'a>
+let inline pure x = Parser (fun (t,c) -> (Output x, c))
 
-    if funcType.Name = parsingType.Name 
-    then (None, c)
-    else
-      let name = parsingType.ToString()
-      let parentToken = castTree tree |> Option.map (fun t' -> t'.Token.Text) |> Option.getOrElse "|UNKNOWN|"
-      printfn "Error at line %A, inside %A while building %A" tree.Line parentToken name
-      (None, c)
+let run (Parser f) (tree, child) = f (tree, child) 
 
-let map f (Parser g) = Parser (g >> fun (x,c) -> (Option.map f x, c))
+let map f (Parser g) = Parser (g >> fun (x,c) -> (mapResult f x, c))
 
 let (|>>) p f = map f p
 
-let (<*>) pf px =
+let (<*>) (pf: ('a -> 'b) Parser)  (px: 'a Parser) : 'b Parser =
   Parser (fun (t,c) ->
     match (run pf (t,c)) with
-    | (Some f, c') -> run px (t,c') |> fun (x,c) -> (Option.map f x, c)
-    | (None, c') -> (None, c')
+    | (Output f, c') -> run px (t,c') |> fun (x,c) -> (mapResult f x, c)
+    | (Error e, c') -> (Error e, c')
   )
 
 let (>>=) p f =
   Parser (fun (t,c) ->
     match (run p (t,c)) with
-    | (Some x, c') -> run (f x) (t, c')
-    | (None, c') -> (None, c')
+    | (Output x, c') -> run (f x) (t, c')
+    | (Error e, c') -> (Error e, c')
   )
-
 
 let lift2 f x y = pure f <*> x <*> y
 
@@ -72,9 +66,16 @@ let traverse f = List.map f >> sequence
 let (<|>) pa pb =
   Parser (fun (t,c) ->
     match (run pa (t,c)) with
-    | (Some a, c') -> (Some a, c')
-    | (None, c')   -> run pb (t,c)
+    | (Output a, c') -> (Output a, c')
+    | (Error e, c') -> run pb (t, c)
   )
+
+let err tree msg : 'a ParserResult =
+  let parsingType = typeof<'a>
+  let name = parsingType.ToString()
+  let parentToken = castTree tree |> Option.map (fun t' -> t'.Token.Text) |> Option.getOrElse "|UNKNOWN|"
+  let e = sprintf "Error at line %A, inside %A while building %A: %A" tree.Line parentToken name msg
+  Error e
 
 let one w =
     let (token, Parser f) = w()
@@ -86,12 +87,12 @@ let one w =
       
       match consumed with
       | Some t' -> f (t', 0) |> fun (x, _) -> (x, t'.ChildIndex + 1)
-      | None -> (None, c)
+      | None -> (err t "No matching token found" , c)
     )
 
 let recursive fp = Parser (fun t -> run (fp()) t)
 
-let fail = Parser (fun (t,c) -> (None, c))
+let fail = Parser (fun (t,c) -> (err t "HARDCODED FAIL", c))
 
 let opt w = (one w |>> Some) <|> pure None
 let rec many w = (one w >>= (fun h -> many w |>> (fun t -> cons h t))) <|> pure []

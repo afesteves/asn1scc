@@ -23,16 +23,19 @@ let attemptProcedure: Procedure Parser = fail
 let attemptTerminator = fail
 
 let attemptASN1 = Parser(fun (t,s) ->
-  (head t.Children |> Option.map (fun c -> c.Text), s))
-
+  head t.Children |> 
+    (function
+    | Some c -> (Output c.Text, s)
+    | None -> (Error "OOPS", s)
+    ))
 let attemptInt = fail
 
 let rec attemptString (label: int) =
   Parser (fun (t,s) ->
-    if t.Type = label then (Some t.Text, s) else 
+    if t.Type = label then (Output t.Text, s) else 
       match t.Children with
-      | (x::xs) when x.Type = label -> (Some x.Text, s)
-      | _ -> (None, s)
+      | (x::xs) when x.Type = label -> (Output x.Text, s)
+      | _ -> (Error "OOPS", s)
    )
 
 and attemptID = attemptString P.ID
@@ -245,8 +248,8 @@ and attemptSystem =
 and attemptPRFile =
   pure PRFile
     <*> many USE
-    <*> many SYSTEM
-    <*> many PROCESS
+    <*> fail
+    <*> fail
 
 and ID _ = (P.ID, attemptID)
 and SIGNAL _ = (P.SIGNAL, attemptSignal)
