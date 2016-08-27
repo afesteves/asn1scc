@@ -137,9 +137,6 @@ let groups5 p = _many p |>> partitions5
 let groups6 p = _many p |>> partitions6
 let groups7 p = _many p |>> partitions7
 
-/// Need better name
-let rec many' parser = (parser >>= (fun h -> many' parser |>> (fun t -> cons h t))) <|> pure []
-
 let choice ps = Seq.fold (<|>) fail ps
 
 let choice2 (a, b) =
