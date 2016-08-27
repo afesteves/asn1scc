@@ -98,6 +98,11 @@ let one w =
       | None -> (err t "No matching token found" , c)
     )
 
+//Anchor for breakpoints
+let debug p = Parser (fun (t,c) ->
+  run p (t,c)
+)
+
 let recursive fp = Parser (fun t -> run (fp()) t)
 
 let fail = Parser (fun (t,c) -> (err t "HARDCODED FAIL", c))
