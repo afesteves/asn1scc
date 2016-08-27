@@ -22,25 +22,19 @@ let attemptPriority = fail
 let attemptProcedure: Procedure Parser = fail
 let attemptTerminator = fail
 
-let attemptASN1 = Parser(fun (t,s) ->
-  head t.Children |> 
-    (function
-    | Some c -> (Output c.Text, s)
-    | None -> (Error ["OOPS"], s)
-    ))
-let attemptInt = fail
 
-let rec attemptString (label: int) =
-  Parser (fun (t,s) ->
-    if t.Type = label then (Output t.Text, s) else 
-      match t.Children with
-      | (x::xs) when x.Type = label -> (Output x.Text, s)
-      | _ -> (Error ["OOPS"], s)
-   )
+let rec attemptStr = Parser(fun (t,s) -> (Output t.Text, s))
 
-and attemptID = attemptString P.ID
-and attemptSort = attemptString P.SORT
-and attemptHyperlink = attemptString P.HYPERLINK
+and attemptID = attemptStr
+
+and attemptASN1 = one STRING
+
+and attemptHyperlink = one STRING
+
+and attemptSort = one ID
+
+and attemptInt = fail
+
 
 and attemptRoute =
     pure Route
@@ -251,6 +245,7 @@ and attemptPRFile =
     <*> many SYSTEM
     <*> many PROCESS
 
+and STRING _ = (P.STRING, attemptStr)
 and ID _ = (P.ID, attemptID)
 and SIGNAL _ = (P.SIGNAL, attemptSignal)
 and BLOCK _ = (P.BLOCK, recursive attemptBlock')

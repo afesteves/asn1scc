@@ -46,12 +46,12 @@ let (<*>) (pf: ('a -> 'b) Parser)  (px: 'a Parser) : 'b Parser =
   Parser (fun (t,c) ->
     let (f, c' ) = run pf (t,c)
     let (x, c'') = run px (t, c')
-    
+
     let r =
       match (f,x) with
       | (Output f', Output x') -> Output (f' x')
-      | (Output f', Error e) -> Error e
-      | (Error e, Output x') -> Error e
+      | (Output _, Error e) -> Error e
+      | (Error e, Output _) -> Error e
       | (Error e, Error e') -> e @ e' |> Error
 
     (r, c'')
