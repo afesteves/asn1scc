@@ -78,12 +78,26 @@ let (<|>) pa pb =
     | (Error _, _) -> run pb (t, c)
   )
 
+let tokenOf tree =
+  castTree tree |> Option.map (fun t' -> t'.Token.Text) |> Option.getOrElse "|UNKNOWN|"
+
+let warn tree msg =
+  printfn "Warning in TOKEN %A, LINE %A: %s" (tokenOf tree) tree.Line msg
+
 let err tree msg : 'a ParserResult =
   let parsingType = typeof<'a>
   let name = parsingType.ToString()
-  let parentToken = castTree tree |> Option.map (fun t' -> t'.Token.Text) |> Option.getOrElse "|UNKNOWN|"
-  let e = sprintf "Error at line %A, inside %A while building %A: %A" tree.Line parentToken name msg
+  let token = tokenOf tree
+  let e = sprintf "Error at line %A, inside %A while building %A: %A" tree.Line token name msg
   Error [e]
+
+let checkFullMatch (t': ITree) (c': ChildIdentifier) =
+  let unmatched = t'.Children |> List.skip c'
+  if unmatched = []
+  then ()
+  else
+    let tokens = unmatched |> List.map (fun t -> (tokenOf t))
+    "unmatched children: " + String.concat "," tokens |> warn t'
 
 let one w =
     let (token, Parser f) = w()
@@ -94,7 +108,9 @@ let one w =
         |> Option.filter (fun t' -> t'.Type = token)
       
       match consumed with
-      | Some t' -> f (t', 0) |> fun (x, _) -> (x, t'.ChildIndex + 1)
+      | Some t' -> f (t', 0) |> fun (r, c') ->
+        checkFullMatch t' c'
+        (r, t'.ChildIndex + 1)
       | None -> (err t "No matching token found" , c)
     )
 
