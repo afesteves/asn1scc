@@ -15,7 +15,7 @@ let castTree (x:ITree) =
   | _ -> None
 
 type ChildIdentifier = int
-type ParserError = string
+type ParserError = string list
 type ParserInput = ITree
 type ParserState = ChildIdentifier
 type ParserResult <'a> = Choice<'a, ParserError>
@@ -44,9 +44,17 @@ let (|>>) p f = map f p
 
 let (<*>) (pf: ('a -> 'b) Parser)  (px: 'a Parser) : 'b Parser =
   Parser (fun (t,c) ->
-    match (run pf (t,c)) with
-    | (Output f, c') -> run px (t,c') |> fun (x,c) -> (mapResult f x, c)
-    | (Error e, c') -> (Error e, c')
+    let (f, c' ) = run pf (t,c)
+    let (x, c'') = run px (t, c')
+    
+    let r =
+      match (f,x) with
+      | (Output f', Output x') -> Output (f' x')
+      | (Output f', Error e) -> Error e
+      | (Error e, Output x') -> Error e
+      | (Error e, Error e') -> e @ e' |> Error
+
+    (r, c'')
   )
 
 let (>>=) p f =
@@ -67,7 +75,7 @@ let (<|>) pa pb =
   Parser (fun (t,c) ->
     match (run pa (t,c)) with
     | (Output a, c') -> (Output a, c')
-    | (Error e, c') -> run pb (t, c)
+    | (Error _, _) -> run pb (t, c)
   )
 
 let err tree msg : 'a ParserResult =
@@ -75,7 +83,7 @@ let err tree msg : 'a ParserResult =
   let name = parsingType.ToString()
   let parentToken = castTree tree |> Option.map (fun t' -> t'.Token.Text) |> Option.getOrElse "|UNKNOWN|"
   let e = sprintf "Error at line %A, inside %A while building %A: %A" tree.Line parentToken name msg
-  Error e
+  Error [e]
 
 let one w =
     let (token, Parser f) = w()

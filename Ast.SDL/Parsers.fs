@@ -26,7 +26,7 @@ let attemptASN1 = Parser(fun (t,s) ->
   head t.Children |> 
     (function
     | Some c -> (Output c.Text, s)
-    | None -> (Error "OOPS", s)
+    | None -> (Error ["OOPS"], s)
     ))
 let attemptInt = fail
 
@@ -35,7 +35,7 @@ let rec attemptString (label: int) =
     if t.Type = label then (Output t.Text, s) else 
       match t.Children with
       | (x::xs) when x.Type = label -> (Output x.Text, s)
-      | _ -> (Error "OOPS", s)
+      | _ -> (Error ["OOPS"], s)
    )
 
 and attemptID = attemptString P.ID
@@ -248,8 +248,8 @@ and attemptSystem =
 and attemptPRFile =
   pure PRFile
     <*> many USE
-    <*> fail
-    <*> fail
+    <*> many SYSTEM
+    <*> many PROCESS
 
 and ID _ = (P.ID, attemptID)
 and SIGNAL _ = (P.SIGNAL, attemptSignal)
