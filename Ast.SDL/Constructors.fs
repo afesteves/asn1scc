@@ -13,10 +13,10 @@ let Connection channel route : Connection = { channel=channel; route=route }
 let Signal parameterNames id vars cifEnd : Signal = { parameterNames=parameterNames; id=id; vars=vars; cifEnd=cifEnd }
 let CIFCoordinates x width y height : CIFCoordinates = { x=x; width=width; y=y; height=height }
 let Variable id sort : Variable = { id=id; sort=sort }
-let VarParameter id sort passBy : VarParameter = { id=id; sort=sort; passBy=passBy }
+let VarParameter id sort passIn passOut : VarParameter = { id=id; sort=sort; passIn=passIn; passOut=passOut }
 let VarDecl id sort init : VarDecl = { id=id; sort=sort; init=init }
 let Result id sort : Result = { id=id; sort=sort }
-let Procedure cif id end1 end2 parameters result body external : Procedure = { cif=cif; id=id; end1=end1; end2=end2; parameters=parameters; result=result; body=body; external=external }
+let Procedure cif id end1 end2 parameters result textAreas procedures body external : Procedure = { cif=cif; id=id; end1=end1; end2=end2; parameters=parameters; result=result; textAreas=textAreas; procedures=procedures; body=body; external=external }
 let TextArea cif content : TextArea = { cif=cif; content=content }
 let Process cif id isReferenced cifEnd1 cifEnd2 parameters start body : Process = { cif=cif; id=id; isReferenced=isReferenced; cifEnd1=cifEnd1; cifEnd2=cifEnd2; parameters=parameters; start=start; body=body }
 let Start cif hyperlink cifEnd entryState transition : Start = { cif=cif; hyperlink=hyperlink; cifEnd=cifEnd; entryState=entryState; transition=transition }

@@ -124,7 +124,11 @@ let recursive fp = Parser (fun t -> run (fp()) t)
 let fail = Parser (fun (t,c) -> (err t "HARDCODED FAIL", c))
 
 let opt w = (one w |>> Some) <|> pure None
+
+let exists token = opt (fun _ -> (token, pure ())) |>> Option.isSome
+
 let rec many w = (one w >>= (fun h -> many w |>> (fun t -> cons h t))) <|> pure []
+
 let rec many1 w = lift2 NonEmptyList.create (one w) (many w)
 
 /// Need better name

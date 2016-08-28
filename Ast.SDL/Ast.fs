@@ -56,9 +56,8 @@ and CIFCoordinates = {
     y: int; height: int
 }
 
-and PassBy = In | Out | InOut
 and Variable     = { id: ID; sort: Sort}
-and VarParameter = { id: ID; sort: Sort; passBy: PassBy } 
+and VarParameter = { id: ID; sort: Sort; passIn: bool; passOut: bool }
 and VarDecl      = { id: ID; sort: Sort; init: Expr option }
 and Result       = { id: ID option; sort: Sort  }
 
@@ -72,8 +71,9 @@ and Procedure = {
     end2: CIFEnd option
     parameters: VarParameters
     result: Result option
-//  something:
-    body: ProcedureBody
+    textAreas: TextArea list
+    procedures: Procedure list
+    body: ProcedureBody option
     external: bool
 }
 and ProcedureBody = 

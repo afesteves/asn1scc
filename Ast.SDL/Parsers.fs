@@ -7,6 +7,7 @@ open Utils
 open AstSDL
 open Antlr.SDL
 open FsUtils
+open FSharpx.Collections
 
 #nowarn "0046"
 #nowarn "1189"
@@ -15,11 +16,9 @@ type P = sdlParser
 
 let attemptExpr = fail
 let attemptPassBy = fail
-let attemptCIFEnd = fail
 
 let attemptContent = fail
 let attemptPriority = fail
-let attemptProcedure: Procedure Parser = fail
 let attemptTerminator = fail
 
 
@@ -61,12 +60,6 @@ and attemptVariable =
       <*> one ID
       <*> one SORT
 
-and attemptVarParameter =
-    pure VarParameter
-      <*> one ID
-      <*> one SORT
-      <*> fail
-
 and attemptVarDecl =
     pure VarDecl 
       <*> one ID
@@ -96,6 +89,12 @@ and attemptLabel =
     pure Label
       <*> one CIF
       <*> one ID
+
+and attemptComment =
+    pure CIFEnd
+      <*> opt CIF
+      <*> opt HYPERLINK
+      <*> one STRING
 
 (*
 and attemptTask = fail
@@ -197,7 +196,35 @@ and attemptInputPart =
       <*> opt TRANSITION
 
 and attemptProcess = fail
-  
+
+and attemptInOut =
+    pure (fun i o io -> (i || io, o || io))
+      <*> exists P.IN
+      <*> exists P.OUT
+      <*> exists P.INOUT
+
+and attemptProcedureParameterGroup =
+    pure (fun (i,o) ids sort -> ids |> List.map (fun id -> VarParameter id sort i o))
+      <*> attemptInOut
+      <*> many ID
+      <*> one SORT
+
+and attemptProcedureSignature = many1 PROCEDURE_PARAMETER_GROUP |>> NonEmptyList.toList
+
+and attemptProcedure' () =
+    pure (fun c i e1 e2 fp r (tx, pr) b e -> Procedure c i e1 e2 fp r tx pr b e)
+      <*> opt CIF
+      <*> one ID
+      <*> opt END
+      <*> opt END
+      <*> (one PROCEDURE_SIGNATURE <|> pure [])
+      <*> opt RESULT
+      <*> groups2 (choice2 (one TEXTAREA, one PROCEDURE))
+      <*> pure None
+      <*> exists P.EXTERNAL
+
+and attemptProcedure = attemptProcedure' ()
+
 and attemptSignal =
     pure Signal 
       <*> (many PARAMNAMES |>> List.concat)
@@ -253,13 +280,13 @@ and SIGNALROUTE _ = (P.SIGNALROUTE, attemptSignalRoute)
 and CONNECTION _ = (P.CONNECTION, attemptConnection)
 and PROCESS _ = (P.PROCESS, attemptProcess)
 and TEXTAREA _ = (P.TEXTAREA, attemptTextArea)
-and PROCEDURE _ = (P.PROCEDURE, attemptProcedure)
+and PROCEDURE _ = (P.PROCEDURE, recursive attemptProcedure')
 and CHANNEL _ = (P.CHANNEL, attemptChannel)
 and SORT _ = (P.SORT, attemptSort)
 and HYPERLINK _ = (P.HYPERLINK, attemptHyperlink)
 and INT _ = (P.INT, attemptInt)
 and ASN1 _ = (P.ASN1, attemptASN1)
-and END _ = (P.END, attemptCIFEnd)
+and END _ = (P.COMMENT, attemptComment)
 and CIF _ = (P.CIF, attemptCIFCoords)
 and TEXTAREA_CONTENT _ = (P.TEXTAREA_CONTENT, attemptContent)
 and LABEL _ = (P.LABEL, attemptLabel)
@@ -273,3 +300,6 @@ and PARAMNAMES _ = (P.PARAMNAMES, many ID)
 and PARAMS _ = (P.PARAMS, many ID)
 and USE _ = (P.USE, attemptClause)
 and SYSTEM _ = (P.SYSTEM, attemptSystem)
+and RESULT _ = (P.RETURNS, attemptResult)
+and PROCEDURE_PARAMETER_GROUP _ = (P.PARAM, attemptProcedureParameterGroup)
+and PROCEDURE_SIGNATURE _ = (P.FPAR, attemptProcedureSignature |>> List.concat)
