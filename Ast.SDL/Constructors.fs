@@ -18,9 +18,10 @@ let VarDecl id sort init : VarDecl = { id=id; sort=sort; init=init }
 let Result id sort : Result = { id=id; sort=sort }
 let Procedure cif id end1 end2 parameters result textAreas procedures body external : Procedure = { cif=cif; id=id; end1=end1; end2=end2; parameters=parameters; result=result; textAreas=textAreas; procedures=procedures; body=body; external=external }
 let TextArea cif content : TextArea = { cif=cif; content=content }
-let Process cif id isReferenced cifEnd1 cifEnd2 parameters start body : Process = { cif=cif; id=id; isReferenced=isReferenced; cifEnd1=cifEnd1; cifEnd2=cifEnd2; parameters=parameters; start=start; body=body }
+let Process cif id referenced cifEnd1 parameters textAreas procedures states body : Process = { cif=cif; id=id; referenced=referenced; cifEnd1=cifEnd1; parameters=parameters; textAreas=textAreas; procedures=procedures; states=states; body=body }
+let ProcessBody start states labels : ProcessBody = { start=start; states=states; labels=labels }
 let Start cif hyperlink cifEnd entryState transition : Start = { cif=cif; hyperlink=hyperlink; cifEnd=cifEnd; entryState=entryState; transition=transition }
-let FreeAction cif hyperlink connector transition : FreeAction = { cif=cif; hyperlink=hyperlink; connector=connector; transition=transition }
+let FloatingLabel cif hyperlink connector transition : FloatingLabel = { cif=cif; hyperlink=hyperlink; connector=connector; transition=transition }
 let State cif hyperlink body parts name cifEnd1 cifEnd2 : State = { cif=cif; hyperlink=hyperlink; body=body; parts=parts; name=name; cifEnd1=cifEnd1; cifEnd2=cifEnd2 }
 let SpontaneousTransition cif hyperlink cifEnd guard transition : SpontaneousTransition = { cif=cif; hyperlink=hyperlink; cifEnd=cifEnd; guard=guard; transition=transition }
 let ConnectPart cif hyperlink cifEnd transition : ConnectPart = { cif=cif; hyperlink=hyperlink; cifEnd=cifEnd; transition=transition }
@@ -28,7 +29,7 @@ let ContinuousSignal cif hyperlink guard priority cifEnd transition : Continuous
 let Priority value cifEnd : Priority = { value=value; cifEnd=cifEnd }
 let CompositeStateGraph name cifEnd1 cifEnd2 points body : CompositeStateGraph = { name=name; cifEnd1=cifEnd1; cifEnd2=cifEnd2; points=points; body=body }
 let StateAggregation name cifEnd1 cifEnd2 entities body : StateAggregation = { name=name; cifEnd1=cifEnd1; cifEnd2=cifEnd2; entities=entities; body=body }
-let CompositeStateBody entities start parts : CompositeStateBody = { entities=entities; start=start; parts=parts }
+//let CompositeStateBody entities start parts : CompositeStateBody = { entities=entities; start=start; parts=parts }
 let StateAggregationBody entities states : StateAggregationBody = { entities=entities; states=states }
 let StatePartitionConnection inner outer cifEnd : StatePartitionConnection = { inner=inner; outer=outer; cifEnd=cifEnd }
 let EntryPoint id via : EntryPoint = { id=id; via=via }

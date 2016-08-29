@@ -140,8 +140,8 @@ and attemptStart =
       <*> one ID
       <*> one TRANSITION
 
-and attemptFreeAction =
-    pure FreeAction
+and attemptFloatingLabel =
+    pure FloatingLabel
       <*> opt CIF
       <*> opt HYPERLINK
       <*> opt ID
@@ -195,8 +195,6 @@ and attemptInputPart =
       <*> fail
       <*> opt TRANSITION
 
-and attemptProcess = fail
-
 and attemptInOut =
     pure (fun i o io -> (i || io, o || io))
       <*> exists P.IN
@@ -209,7 +207,31 @@ and attemptProcedureParameterGroup =
       <*> many ID
       <*> one SORT
 
+and attemptProcessParameterGroup =
+    pure (fun ids sort -> ids |> List.map (fun id -> Variable id sort))
+      <*> many ID
+      <*> one SORT
+
+and attemptProcessSignature = many1 PROCESS_PARAMETER_GROUP |>> NonEmptyList.toList
 and attemptProcedureSignature = many1 PROCEDURE_PARAMETER_GROUP |>> NonEmptyList.toList
+
+and attemptProcess =
+    pure Process
+      <*> debug(opt CIF)
+      <*> one ID
+      <*> exists P.REFERENCED
+      <*> opt END
+      <*> (one PROCESS_SIGNATURE <|> pure [])
+      <*> many TEXT_AREA
+      <*> many PROCEDURE
+      <*> pure []
+      <*> pure None
+
+and attemptProcessBody =
+    pure ProcessBody
+      <*> pure None
+      <*> pure []
+      <*> pure []
 
 and attemptProcedure' () =
     pure (fun c i e1 e2 fp r (tx, pr) b e -> Procedure c i e1 e2 fp r tx pr b e)
@@ -219,7 +241,7 @@ and attemptProcedure' () =
       <*> opt END
       <*> (one PROCEDURE_SIGNATURE <|> pure [])
       <*> opt RESULT
-      <*> groups2 (choice2 (one TEXTAREA, one PROCEDURE))
+      <*> groups2 (choice2 (one TEXT_AREA, one PROCEDURE))
       <*> pure None
       <*> exists P.EXTERNAL
 
@@ -256,7 +278,7 @@ and attemptSystemEntity =
   choice5
     ( one SIGNAL
     , one BLOCK
-    , one TEXTAREA
+    , one TEXT_AREA
     , one PROCEDURE
     , one CHANNEL)
 
@@ -279,7 +301,7 @@ and ROUTE _ = (P.ROUTE, attemptRoute)
 and SIGNALROUTE _ = (P.SIGNALROUTE, attemptSignalRoute)
 and CONNECTION _ = (P.CONNECTION, attemptConnection)
 and PROCESS _ = (P.PROCESS, attemptProcess)
-and TEXTAREA _ = (P.TEXTAREA, attemptTextArea)
+and TEXT_AREA _ = (P.TEXTAREA, attemptTextArea)
 and PROCEDURE _ = (P.PROCEDURE, recursive attemptProcedure')
 and CHANNEL _ = (P.CHANNEL, attemptChannel)
 and SORT _ = (P.SORT, attemptSort)
@@ -302,4 +324,8 @@ and USE _ = (P.USE, attemptClause)
 and SYSTEM _ = (P.SYSTEM, attemptSystem)
 and RESULT _ = (P.RETURNS, attemptResult)
 and PROCEDURE_PARAMETER_GROUP _ = (P.PARAM, attemptProcedureParameterGroup)
+and PROCESS_PARAMETER_GROUP _ = (P.PARAM, attemptProcessParameterGroup)
+and PROCESS_SIGNATURE _ = (P.PFPAR, attemptProcessSignature |>> List.concat)
 and PROCEDURE_SIGNATURE _ = (P.FPAR, attemptProcedureSignature |>> List.concat)
+//and PROCESS_BODY _ = (P.)
+and TYPE_INSTANCE _ = (P.TYPE_INSTANCE, attemptSort)

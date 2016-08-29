@@ -73,12 +73,9 @@ and Procedure = {
     result: Result option
     textAreas: TextArea list
     procedures: Procedure list
-    body: ProcedureBody option
+    body: ProcessBody option
     external: bool
 }
-and ProcedureBody = 
-    | PB_Start of start: Start * parts: BodyPart list
-    | PB_Parts of parts: BodyPart NonEmptyList
 
 and TextArea = {
     cif: CIFCoordinates
@@ -99,37 +96,37 @@ and ContentEntity =
     | C_Declarations of VarDecl list
     | C_Newtype      of Newtype
 
-and Newtype = 
+and Newtype =
     | N_Dictionary of id: ID * key: Sort * value: Sort
     | N_Struct of id: ID * vars: Variables
 
-
-// and Instances = { initial: int; max: int}
 and Process = {
     cif: CIFCoordinates option
     id: ID
-//  instances: Instances
-//  instanceType:
-    isReferenced: bool
+    referenced: bool
     cifEnd1: CIFEnd option
-    cifEnd2: CIFEnd option
     parameters: Variables
-//  something:
-    start: Start
-    body: BodyPart list
+    textAreas: TextArea list
+    procedures: Procedure list
+    states: CompositeState list
+    body: ProcessBody option
 }
 
-and BodyPart = Choice<State, FreeAction>
+and ProcessBody = {
+    start: Start option
+    states: State list
+    labels: FloatingLabel list
+}
 
-and Start = { 
-    cif: CIFCoordinates option 
+and Start = {
+    cif: CIFCoordinates option
     hyperlink: Hyperlink option
     cifEnd: CIFEnd option
     entryState: ID
     transition: Transition
 }
 
-and FreeAction = {
+and FloatingLabel = {
     cif: CIFCoordinates option
     hyperlink: Hyperlink option
     connector: ID option
@@ -209,11 +206,11 @@ and StateAggregation = {
     body: StateAggregationBody
 }
 
-and CompositeStateBody = {  
+and CompositeStateBody = {
     entities: Choice<TextArea, Procedure, CompositeState> list
     start: Start list
-    parts: BodyPart list
-
+    state: State list
+    labels: FloatingLabel list
 }
 
 and StateAggregationBody = {
