@@ -82,7 +82,7 @@ let tokenOf tree =
   castTree tree |> Option.map (fun t' -> t'.Token.Text) |> Option.getOrElse "|UNKNOWN|"
 
 let warn tree msg =
-  printfn "Warning in TOKEN %A, LINE %A: %s" (tokenOf tree) tree.Line msg
+  printfn "Warning in %A, LINE %A: %s" (tokenOf tree) tree.Line msg
 
 let err tree msg : 'a ParserResult =
   let parsingType = typeof<'a>
@@ -96,8 +96,8 @@ let checkFullMatch (t': ITree) (c': ChildIdentifier) =
   if unmatched = []
   then ()
   else
-    let tokens = unmatched |> List.map (fun t -> (tokenOf t))
-    "unmatched children: " + String.concat "," tokens |> warn t'
+    let children = unmatched |> List.map (fun t -> sprintf "L%d/%s" t.Line (tokenOf t))
+    "unmatched children: " + String.concat " " children |> warn t'
 
 let one w =
     let (token, Parser f) = w()
