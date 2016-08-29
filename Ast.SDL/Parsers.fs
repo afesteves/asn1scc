@@ -69,9 +69,9 @@ and attemptVarDecl =
 and attemptCIFCoords =
     pure CIFCoordinates 
       <*> one INT
-      <*> fail
-      <*> fail
-      <*> fail
+      <*> one INT
+      <*> one INT
+      <*> one INT
 
 and attemptTextArea =
     pure TextArea
