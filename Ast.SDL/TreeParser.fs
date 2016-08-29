@@ -119,7 +119,7 @@ let debug p = Parser (fun (t,c) ->
   run p (t,c)
 )
 
-let recursive fp = Parser (fun t -> run (fp()) t)
+let recursive fp = Parser (fun (t,c) -> run (fp()) (t,c))
 
 let fail = Parser (fun (t,c) -> (err t "HARDCODED FAIL", c))
 
