@@ -88,7 +88,7 @@ let err tree msg : 'a ParserResult =
   let parsingType = typeof<'a>
   let name = parsingType.ToString()
   let token = tokenOf tree
-  let e = sprintf "Error at line %A, inside %A while building %A: %A" tree.Line token name msg
+  let e = sprintf "Error at line %A, token %A while building %A: %A" tree.Line token name msg
   Error [e]
 
 let checkFullMatch (t': ITree) (c': ChildIdentifier) =
@@ -121,7 +121,10 @@ let debug p = Parser (fun (t,c) ->
 
 let recursive fp = Parser (fun (t,c) -> run (fp()) (t,c))
 
-let fail = Parser (fun (t,c) -> (err t "HARDCODED FAIL", c))
+let fail = Parser (fun (t,c) ->
+    let (Error e) = err t "HARDCODED FAIL"
+    print e
+    (Error e, c))
 
 let opt w = (one w |>> Some) <|> pure None
 
