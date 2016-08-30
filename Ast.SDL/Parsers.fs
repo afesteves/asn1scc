@@ -32,7 +32,7 @@ and attemptHyperlink = one STRING
 
 and attemptSort = one ID
 
-and attemptInt = fail
+and attemptInt = attemptStr |>> int
 
 and attemptRoute =
     pure Route
