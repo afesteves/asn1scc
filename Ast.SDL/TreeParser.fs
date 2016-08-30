@@ -75,7 +75,23 @@ let (>>=) p f =
   )
 
 /// Turn a function over two arguments into one over two parsers
-let lift2 f x y = pure f <*> x <*> y
+let lift2 h a b = pure h <*> a <*> b
+
+/// Turn a function over three arguments into one over three parsers
+let lift3 h a b c = pure h <*> a <*> b <*> c
+
+/// Turn a function over four arguments into one over four parsers
+let lift4 h a b c d = pure h <*> a <*> b <*> c <*> d
+
+/// Turn a function over five arguments into one over five parsers
+let lift5 h a b c d e = pure h <*> a <*> b <*> c <*> d <*> e
+
+/// Turn a function over six arguments into one over six parsers
+let lift6 h a b c d e f = pure h <*> a <*> b <*> c <*> d <*> e <*> f
+
+/// Turn a function over seven arguments into one over seven parsers
+let lift7 h a b c d e f g = pure h <*> a <*> b <*> c <*> d <*> e <*> f <*> g
+
 
 /// Run two parsers in sequence, keep the first's output
 let (.>>) pa pb = lift2 (fun a _ -> a) pa pb
