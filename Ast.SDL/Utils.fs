@@ -4,8 +4,10 @@ let print x = printfn "%A" x
 
 let cons x xs = x :: xs
 
+/// Flips the first two arguments
 let flip f x y = f y x
 
+/// First element of a list
 let head =
   function
   | [] -> None
@@ -13,12 +15,14 @@ let head =
 
 let partitionsWith baseCase recursion xs = List.foldBack (flip recursion) xs baseCase
 
+/// Split a list of Choice into a tuple with a list for each case
 let partitions2 xs = xs |> partitionsWith ([], []) (fun (a,b) -> 
     function
     | Choice1Of2 y -> (y :: a, b)
     | Choice2Of2 y -> (a, y :: b)
   )
 
+/// Split a list of Choice into a tuple with a list for each case
 let partitions3 xs = xs |> partitionsWith ([], [], []) (fun (a,b,c) -> 
     function
     | Choice1Of3 y -> (y :: a, b, c)
@@ -26,6 +30,7 @@ let partitions3 xs = xs |> partitionsWith ([], [], []) (fun (a,b,c) ->
     | Choice3Of3 y -> (a, b, y :: c)
   )
 
+/// Split a list of Choice into a tuple with a list for each case
 let partitions4 xs = xs |> partitionsWith ([], [], [], []) (fun (a,b,c,d) -> 
     function
     | Choice1Of4 y -> (y :: a, b, c, d)
@@ -34,6 +39,7 @@ let partitions4 xs = xs |> partitionsWith ([], [], [], []) (fun (a,b,c,d) ->
     | Choice4Of4 y -> (a, b, c, y :: d)
   )
 
+/// Split a list of Choice into a tuple with a list for each case
 let partitions5 xs = xs |> partitionsWith ([], [], [], [], []) (fun (a,b,c,d,e) -> 
     function
     | Choice1Of5 y -> (y :: a, b, c, d, e)
@@ -43,6 +49,7 @@ let partitions5 xs = xs |> partitionsWith ([], [], [], [], []) (fun (a,b,c,d,e) 
     | Choice5Of5 y -> (a, b, c, d, y :: e)
   )
 
+/// Split a list of Choice into a tuple with a list for each case
 let partitions6 xs = xs |> partitionsWith ([], [], [], [], [], []) (fun (a,b,c,d,e,f) -> 
     function
     | Choice1Of6 y -> (y :: a, b, c, d, e, f)
@@ -53,6 +60,7 @@ let partitions6 xs = xs |> partitionsWith ([], [], [], [], [], []) (fun (a,b,c,d
     | Choice6Of6 y -> (a, b, c, d, e, y :: f)
   )
 
+/// Split a list of Choice into a tuple with a list for each case
 let partitions7 xs = xs |> partitionsWith ([], [], [], [], [], [], []) (fun (a,b,c,d,e,f,g) -> 
     function
     | Choice1Of7 y -> (y :: a, b, c, d, e, f, g)
