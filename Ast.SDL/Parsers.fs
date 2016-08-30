@@ -17,7 +17,6 @@ type P = sdlParser
 let attemptExpr = fail
 let attemptPassBy = fail
 
-let attemptContent = fail
 let attemptPriority = fail
 let attemptTerminator = fail
 
@@ -60,12 +59,6 @@ and attemptVariable =
       <*> one ID
       <*> one SORT
 
-and attemptVarDecl =
-    pure VarDecl 
-      <*> one ID
-      <*> one SORT
-      <*> fail
-
 and attemptCIFCoords =
     pure CIFCoordinates 
       <*> one INT
@@ -73,10 +66,21 @@ and attemptCIFCoords =
       <*> one INT
       <*> one INT
 
+and attemptContent =
+    pure Content
+      <*> (one PROCEDURE_SIGNATURE <|> pure [])
+      <*> opt RESULT
+      <*> many PROCEDURE
+      <*> (many DCL |>> List.concat)
+      <*> pure []
+      <*> many SIGNAL
+      <*> many USE
+
 and attemptTextArea =
     pure TextArea
       <*> one CIF
       <*> opt TEXTAREA_CONTENT
+      .>> exists P.ENDTEXT
      
 and attemptClause =
     pure UseClause
@@ -212,6 +216,13 @@ and attemptProcessParameterGroup =
       <*> many ID
       <*> one SORT
 
+and attemptDeclarationGroup =
+    pure (fun ids s e -> ids |> List.map (fun id -> VarDecl id s e))
+      <*> many ID
+      <*> one SORT
+      <*> pure None
+
+and attemptDcl = many1 DECLARATION_GROUP |>> NonEmptyList.toList
 and attemptProcessSignature = many1 PROCESS_PARAMETER_GROUP |>> NonEmptyList.toList
 and attemptProcedureSignature = many1 PROCEDURE_PARAMETER_GROUP |>> NonEmptyList.toList
 
@@ -325,7 +336,9 @@ and SYSTEM _ = (P.SYSTEM, attemptSystem)
 and RESULT _ = (P.RETURNS, attemptResult)
 and PROCEDURE_PARAMETER_GROUP _ = (P.PARAM, attemptProcedureParameterGroup)
 and PROCESS_PARAMETER_GROUP _ = (P.PARAM, attemptProcessParameterGroup)
+and DECLARATION_GROUP _ = (P.VARIABLES, attemptDeclarationGroup)
 and PROCESS_SIGNATURE _ = (P.PFPAR, attemptProcessSignature |>> List.concat)
 and PROCEDURE_SIGNATURE _ = (P.FPAR, attemptProcedureSignature |>> List.concat)
+and DCL _ = (P.DCL, attemptDcl |>> List.concat)
 //and PROCESS_BODY _ = (P.)
 and TYPE_INSTANCE _ = (P.TYPE_INSTANCE, attemptSort)

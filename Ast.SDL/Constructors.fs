@@ -18,6 +18,7 @@ let VarDecl id sort init : VarDecl = { id=id; sort=sort; init=init }
 let Result id sort : Result = { id=id; sort=sort }
 let Procedure cif id end1 end2 parameters result textAreas procedures body external : Procedure = { cif=cif; id=id; end1=end1; end2=end2; parameters=parameters; result=result; textAreas=textAreas; procedures=procedures; body=body; external=external }
 let TextArea cif content : TextArea = { cif=cif; content=content }
+let Content parameters result procedures declarations timers signals clauses : Content = { parameters=parameters; result=result; procedures=procedures; declarations=declarations; timers=timers; signals=signals; clauses=clauses }
 let Process cif id referenced cifEnd1 parameters textAreas procedures states body : Process = { cif=cif; id=id; referenced=referenced; cifEnd1=cifEnd1; parameters=parameters; textAreas=textAreas; procedures=procedures; states=states; body=body }
 let ProcessBody start states labels : ProcessBody = { start=start; states=states; labels=labels }
 let Start cif hyperlink cifEnd entryState transition : Start = { cif=cif; hyperlink=hyperlink; cifEnd=cifEnd; entryState=entryState; transition=transition }

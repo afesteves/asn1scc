@@ -79,19 +79,15 @@ and TextArea = {
     content: Content option
 }
 
-and Content = ContentEntity list
-
-and ContentEntity = 
-    | C_Procedure    of Procedure
-    | C_UseClause    of UseClause
-    | C_Signal       of Signal
-    | C_Result       of Result 
-    | C_Parameters   of ProcedureParameter list
-    | C_Timer        of ID list
-    | C_Synonym      of Sort * ID * Expr
-    | C_Refinement   of Sort * Sort * RangeCondition list
-    | C_Declarations of VarDecl list
-    | C_Newtype      of Newtype
+and Content = {
+    parameters: ProcedureParameter list
+    result: Result option
+    procedures: Procedure list
+    declarations: VarDecl list
+    timers: ID list
+    signals: Signal list
+    clauses: UseClause list
+}
 
 and Newtype =
     | N_Dictionary of id: ID * key: Sort * value: Sort

@@ -66,6 +66,9 @@ let (>>=) p f =
 
 let lift2 f x y = pure f <*> x <*> y
 
+let (.>>) pa pb = lift2 (fun a _ -> a) pa pb
+let (>>.) pa pb = lift2 (fun _ b -> b) pa pb
+
 let rec sequence (parsers: 'a Parser list) : 'a list Parser =
   List.foldBack (lift2 cons) parsers (pure []) 
 
