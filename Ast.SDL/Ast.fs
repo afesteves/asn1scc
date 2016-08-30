@@ -56,20 +56,17 @@ and CIFCoordinates = {
     y: int; height: int
 }
 
-and Variable     = { id: ID; sort: Sort}
-and VarParameter = { id: ID; sort: Sort; passIn: bool; passOut: bool }
-and VarDecl      = { id: ID; sort: Sort; init: Expr option }
-and Result       = { id: ID option; sort: Sort  }
-
-and Variables = Variable list
-and VarParameters = VarParameter list
+and Parameter          = { id: ID; sort: Sort}
+and ProcedureParameter = { id: ID; sort: Sort; passIn: bool; passOut: bool }
+and VarDecl            = { id: ID; sort: Sort; init: Expr option }
+and Result             = { id: ID option; sort: Sort  }
 
 and Procedure = {
     cif: CIFCoordinates option
     id: ID
     end1: CIFEnd option
     end2: CIFEnd option
-    parameters: VarParameters
+    parameters: ProcedureParameter list
     result: Result option
     textAreas: TextArea list
     procedures: Procedure list
@@ -89,7 +86,7 @@ and ContentEntity =
     | C_UseClause    of UseClause
     | C_Signal       of Signal
     | C_Result       of Result 
-    | C_Parameters   of VarParameters
+    | C_Parameters   of ProcedureParameter list
     | C_Timer        of ID list
     | C_Synonym      of Sort * ID * Expr
     | C_Refinement   of Sort * Sort * RangeCondition list
@@ -98,14 +95,14 @@ and ContentEntity =
 
 and Newtype =
     | N_Dictionary of id: ID * key: Sort * value: Sort
-    | N_Struct of id: ID * vars: Variables
+    | N_Struct of id: ID * vars: Parameter list
 
 and Process = {
     cif: CIFCoordinates option
     id: ID
     referenced: bool
     cifEnd1: CIFEnd option
-    parameters: Variables
+    parameters: Parameter list
     textAreas: TextArea list
     procedures: Procedure list
     states: CompositeState list

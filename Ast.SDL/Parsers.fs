@@ -56,7 +56,7 @@ and attemptResult =
       <*> one SORT
 
 and attemptVariable = 
-    pure Variable
+    pure Parameter
       <*> one ID
       <*> one SORT
 
@@ -202,13 +202,13 @@ and attemptInOut =
       <*> exists P.INOUT
 
 and attemptProcedureParameterGroup =
-    pure (fun (i,o) ids sort -> ids |> List.map (fun id -> VarParameter id sort i o))
+    pure (fun (i,o) ids sort -> ids |> List.map (fun id -> ProcedureParameter id sort i o))
       <*> attemptInOut
       <*> many ID
       <*> one SORT
 
 and attemptProcessParameterGroup =
-    pure (fun ids sort -> ids |> List.map (fun id -> Variable id sort))
+    pure (fun ids sort -> ids |> List.map (fun id -> Parameter id sort))
       <*> many ID
       <*> one SORT
 
