@@ -33,10 +33,8 @@ let Output = Choice1Of2
 /// Synonym for Choice2Of2
 let Error = Choice2Of2
 
-let mapResult (f: 'a -> 'b) (r: 'a ParserResult) : 'b ParserResult =
-  match r with
-  | Output o -> Output (f o)
-  | Error e -> Error e
+/// Map a function over Choice1Of2
+let mapResult = Choice.map
 
 /// A parser that consumes no input and yields the specified value
 let inline pure x = Parser (fun (t,c) -> (Output x, c))
