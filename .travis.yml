@@ -1,3 +1,21 @@
 os: osx
 language: csharp
-script: xbuild /p:TargetFrameworkVersion="v4.5"
+script: ./circleci-build.sh
+
+before_install:
+  - brew install python3
+  - mkdir tmp
+  - cd tmp
+  - wget "https://downloads.sourceforge.net/project/gnuada/GNAT_GCC%20Mac%20OS%20X/7.1.0/native-2016/gcc-7.1.0-x86_64-apple-darwin15-bin.tar.bz2"
+  - tar jxf *                                                    # extract the only file
+  - cd $(find * -type d -maxdepth 0)                             # go into the only directory
+  - echo -e "\n\ny\ny\n" | sudo ./doinstall                      # installation prompt answers
+  - export PATH=$(find /opt/gcc* -type d -maxdepth 0)/bin:$PATH  # put gcc with gnat first in PATH
+  - cd ../..                                                     # go back to initial folder
+  - sw_vers                                                      # print Mac OS X operating system version information
+  - gcc --version
+  - gcov --version
+  - java -version
+  - gnatmake --version
+  - python --version
+  - xbuild /version
