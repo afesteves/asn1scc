@@ -6,7 +6,8 @@ before_install:
   - brew install python3
   - mkdir tmp
   - cd tmp
-  - wget "https://downloads.sourceforge.net/project/gnuada/GNAT_GCC%20Mac%20OS%20X/7.1.0/native-2016/gcc-7.1.0-x86_64-apple-darwin15-bin.tar.bz2"
+# - wget "https://downloads.sourceforge.net/project/gnuada/GNAT_GCC%20Mac%20OS%20X/7.1.0/native-2016/gcc-7.1.0-x86_64-apple-darwin15-bin.tar.bz2"
+  - wget "https://downloads.sourceforge.net/project/gnuada/GNAT_GCC%20Mac%20OS%20X/6.1.0/native-2016/gcc-6.1.0-x86_64-apple-darwin15-2016-bin.tar.bz2"
   - tar jxf *                                                    # extract the only file
   - cd $(find * -type d -maxdepth 0)                             # go into the only directory
   - echo -e "\n\ny\ny\n" | sudo ./doinstall                      # installation prompt answers
