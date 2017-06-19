@@ -3,7 +3,7 @@ image:
   - Visual Studio 2015
   - Visual Studio 2017
 
-build_script: msbuild /p:TargetFrameworkVersion="v4.6.2"
+build_script: msbuild /p:TargetFrameworkVersion="v4.7.0"
 
 #build:
 #  project: Asn1.sln
