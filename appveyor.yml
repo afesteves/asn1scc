@@ -3,7 +3,9 @@ image:
   - Visual Studio 2015
   - Visual Studio 2017
 
-build:
-  project: Asn1.sln
-  parallel: true
-  verbosity: normal
+build_script: msbuild /p:TargetFrameworkVersion="v4.5"
+
+#build:
+#  project: Asn1.sln
+#  parallel: true
+#  verbosity: normal
