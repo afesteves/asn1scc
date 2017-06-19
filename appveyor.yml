@@ -5,4 +5,5 @@ image:
 
 build:
   project: Asn1.sln
+  parallel: true
   verbosity: normal
