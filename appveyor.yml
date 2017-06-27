@@ -4,6 +4,8 @@ build:
   parallel: true
   project: Asn1.sln
   verbosity: normal
-after_build:
+
+before_build:
   - cd Tests
+  - setx PATH "%PATH%;c:\msys64\bin"
   - make
