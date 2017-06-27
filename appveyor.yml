@@ -7,6 +7,5 @@ build:
 
 before_build:
   - cd Tests
-  - copy c:\MinGW\bin\mingw32-make.exe c:\MinGW\bin\make.exe
-  - setx PATH "%PATH%;c:\MinGW\bin"
-  - make.exe
+  - c:\MinGW\bin\mingw32-make.exe
+
