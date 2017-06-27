@@ -6,6 +6,7 @@ build:
   verbosity: normal
 
 before_build:
+  - echo %PATH%
   - cd Tests
   - c:\cygwin64\bin\make.exe
 
