@@ -5,7 +5,7 @@ build:
   project: Asn1.sln
   verbosity: normal
 
-after_build:
+before_build:
   - cd Tests
-  - c:\MinGW\bin\mingw32-make.exe
+  - c:\cygwin64\make.exe
 
