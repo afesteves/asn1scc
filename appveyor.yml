@@ -4,3 +4,6 @@ build:
   parallel: true
   project: Asn1.sln
   verbosity: normal
+after_build:
+  - cd Tests
+  - make
