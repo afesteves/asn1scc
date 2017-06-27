@@ -7,5 +7,5 @@ build:
 
 before_build:
   - cd Tests
-  - c:\cygwin64\make.exe
+  - c:\cygwin64\bin\make.exe
 
