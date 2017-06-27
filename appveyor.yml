@@ -6,6 +6,7 @@ build:
   verbosity: normal
 
 before_build:
+  - echo %PATH%
   - setx PATH "%PATH%;%CD%\tools"
   - echo %PATH%
   - mkdir tools
