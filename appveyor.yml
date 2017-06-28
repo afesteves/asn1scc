@@ -7,7 +7,6 @@ build:
 
 before_build:
   - set PATH "%PATH%;../../Asn1f2/bin/Debug"
-  - echo %PATH%
   - ps: Set-Alias python3 "c:\Python36-x64\python.exe"
   - ps: python3 Tests/scripts/runTests.py -l c
   #- ps: Set-Alias make "c:\cygwin64\bin\make.exe"
