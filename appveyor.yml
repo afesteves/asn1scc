@@ -7,8 +7,6 @@ build:
 
 before_build:
   - echo %PATH%
-  - setx PATH %CD%\Asn1f2\bin\Debug;"%PATH%"
-  - echo %PATH%
   - set  PATH %CD%\Asn1f2\bin\Debug;"%PATH%"
   - echo %PATH%
   - make
