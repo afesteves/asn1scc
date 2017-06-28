@@ -6,14 +6,13 @@ build:
   verbosity: normal
 
 init:
-  - doskey make="c:\cygwin64\bin\make.exe"
   - doskey python3="c:\Python36-x64\python.exe"
   - doskey dafuq=dir
 
 before_build:
 #  - appveyor-build.bat
   - cd Tests
-
+  - ps: Set-Alias make "c:\cygwin64\bin\make.exe"
   - ps: make
     
 
