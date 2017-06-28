@@ -5,14 +5,10 @@ build:
   project: Asn1.sln
   verbosity: normal
 
-init:
-  - doskey python3="c:\Python36-x64\python.exe"
-  - doskey dafuq=dir
-
 before_build:
-#  - appveyor-build.bat
   - cd Tests
   - ps: Set-Alias make "c:\cygwin64\bin\make.exe"
+  - ps: Set-Alias python3="c:\Python36-x64\python.exe"
   - ps: make
     
 
