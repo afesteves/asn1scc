@@ -6,6 +6,7 @@ build:
   verbosity: normal
 
 before_build:
+  - set  PATH "%CD%\Asn1f2\bin\Debug;%PATH%"
   - setx PATH "%CD%\Asn1f2\bin\Debug;%PATH%"
   - echo %PATH%
   - ps: Set-Alias python3 "c:\Python36-x64\python.exe"
