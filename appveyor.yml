@@ -12,4 +12,4 @@ before_build:
   - cd Tests
   - copy c:\cygwin64\bin\make.exe make.exe
   - dir
-  - make
+  - make.exe
