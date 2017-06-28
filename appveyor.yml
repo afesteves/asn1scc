@@ -10,7 +10,8 @@ before_build:
   - cd scripts
   - setx PATH "%PATH%;../../Asn1f2/bin/Debug"
   - echo %PATH%
-  - ./runTests.py -l c
+  - ps: Set-Alias python3 "c:\Python36-x64\python.exe"
+  - python3 ./runTests.py -l c
   #- ps: Set-Alias make "c:\cygwin64\bin\make.exe"
   #- ps: Set-Alias python3 "c:\Python36-x64\python.exe"
   #- ps: make
