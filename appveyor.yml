@@ -6,10 +6,7 @@ build:
   verbosity: normal
 
 before_build:
-  - setx PATH "%CD%\tools;%PATH%"
-  - echo %PATH%
-  - mkdir tools
-  - copy c:\Python36-x64\python.exe tools\python3
-  - copy c:\cygwin64\bin\make.exe tools\make
+  - DOSKEY make="c:\cygwin64\bin\make.exe"
+  - DOSKEY python3="c:\Python36-x64\python.exe"
   - cd Tests
   - make
