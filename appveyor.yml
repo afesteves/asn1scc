@@ -13,7 +13,7 @@ init:
 before_build:
 #  - appveyor-build.bat
   - cd Tests
-  - ps: dafuq
+
   - ps: make
     
 
